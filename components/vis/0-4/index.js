@@ -14,18 +14,18 @@ const MONTHS = [
 ];
 const HOURS = Array.from({ length: 12 }, (_, i) => i * 2).map((h) => `${String(h).padStart(2, "0")}:00`);
 
-// Generate Image List: Year x Hour (Month is fixed to 07)
+// Generate Image List: Year x Hour (Month is fixed to 01)
 const IMAGE_FILES = [];
 for (let y = 0; y < 12; y++) {
   const year = YEARS[y];
   for (let h = 0; h < 12; h++) {
     const hour = h * 2;
     const hourStr = String(hour).padStart(2, "0");
-    IMAGE_FILES.push(`${year}_07_${hourStr}.png`);
+    IMAGE_FILES.push(`${year}_01_${hourStr}.png`);
   }
 }
 
-const IMAGE_PATHS = IMAGE_FILES.map(f => `/generated-img/July_불광천/${f}`);
+const IMAGE_PATHS = IMAGE_FILES.map(f => `/generated-img/Jan_불광천/${f}`);
 
 import { Container, Overlay, Title, Info } from "./styles";
 
@@ -446,45 +446,65 @@ export default function VisInteractive() {
     cubeSize: { value: 1.0, min: 0.1, max: 2.0, step: 0.1 },
   });
 
+  // Window width for scaling
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1000);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const scale = recordMode ? windowWidth / 6480 : 1;
+
   return (
     <Container>
       <Leva collapsed={false} /> 
       
       <div style={{
-        width: recordMode ? '6480px' : '100vw',
-        height: recordMode ? '432px' : '100vh',
-        margin: recordMode ? '0 auto' : '0',
-        border: recordMode ? '2px solid red' : 'none',
+        width: '100vw',
+        height: recordMode ? `${432 * scale}px` : '100vh',
+        overflow: 'hidden',
         position: 'relative',
-        transition: 'all 0.3s ease',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        border: recordMode ? '2px solid red' : 'none',
+        transition: 'height 0.3s ease',
+        background: '#000', // Black background for letterboxing effect
       }}>
-        <Canvas 
-          gl={{ preserveDrawingBuffer: true }}
-          onCreated={({ gl }) => {
-            window._canvas = gl.domElement;
-          }}
-        >
-          <color attach="background" args={['#111']} />
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} />
-          
-          <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
+        <div style={{
+          width: recordMode ? '6480px' : '100vw',
+          height: recordMode ? '432px' : '100vh',
+          transform: recordMode ? `scale(${scale})` : 'none',
+          transformOrigin: 'center center',
+          flexShrink: 0, 
+        }}>
+          <Canvas 
+            gl={{ preserveDrawingBuffer: true }}
+            onCreated={({ gl }) => {
+              window._canvas = gl.domElement;
+            }}
+          >
+            <color attach="background" args={['#111']} />
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} />
+            
+            <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
 
-          <AtlasCubeGrid 
-            onHover={setHovered} 
-            onClick={setSelected} 
-            config={config}
-          />
-          
-          <OrbitControls enableDamping target={[0, 0, 0]} />
-        </Canvas>
+            <AtlasCubeGrid 
+              onHover={setHovered} 
+              onClick={setSelected} 
+              config={config}
+            />
+            
+            <OrbitControls enableDamping target={[0, 0, 0]} />
+          </Canvas>
+        </div>
       </div>
 
       <Overlay>
-        <Title>Interactive Grid (July Bulgwangcheon)</Title>
+        <Title>Interactive Grid (Jan Bulgwangcheon)</Title>
         <Info>
           Grid: {config.N} x {config.N} x {config.N}<br/>
           Total: {config.N ** 3}<br/>
