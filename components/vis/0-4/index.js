@@ -221,43 +221,31 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     }).catch(err => console.error("Atlas generation failed", err));
   }, []);
   
-  // --- Data Preparation ---
-  const { indexArray } = useMemo(() => {
-    const indexArray = new Float32Array(count);
-    let i = 0;
-    for (let x = 0; x < N; x++) {
-      for (let y = 0; y < N; y++) {
-        for (let z = 0; z < N; z++) {
-          const yearIdx = x % 12;
-          const hourIdx = z % 12;
-          const atlasIndex = (yearIdx * 12) + hourIdx;
-          indexArray[i] = atlasIndex;
-          i++;
-        }
-      }
-    }
-    return { indexArray };
-  }, [N, count]);
-
-  // --- Layout & Animation ---
-  
-  // 1. Canonical Cube Positions (Exact Match to Original)
-  const cubePositions = useMemo(() => {
+  // 1. Canonical Cube Positions AND Index Array (Unified to ensure sync)
+  const { cubePositions, indexArray } = useMemo(() => {
     const pos = new Float32Array(count * 3);
+    const idx = new Float32Array(count);
     let i = 0;
     const offset = (N - 1) * spacing / 2;
-    // EXACT original loop structure
+    
     for (let x = 0; x < N; x++) {
       for (let y = 0; y < N; y++) {
         for (let z = 0; z < N; z++) {
+           // Position
            pos[i*3] = (x * spacing) - offset;
            pos[i*3+1] = (y * spacing) - offset;
            pos[i*3+2] = (z * spacing) - offset;
+           
+           // Texture Index
+           const yearIdx = x % 12;
+           const hourIdx = z % 12;
+           idx[i] = (yearIdx * 12) + hourIdx;
+           
            i++;
         }
       }
     }
-    return pos;
+    return { cubePositions: pos, indexArray: idx };
   }, [N, spacing, count]);
 
   // 2. Determine Target Positions
@@ -333,14 +321,14 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   });
 
   // Initial Attribute Setup
-  useEffect(() => {
+  React.useLayoutEffect(() => {
     if (meshRef.current) {
       meshRef.current.geometry.setAttribute(
         'aAtlasIndex',
         new THREE.InstancedBufferAttribute(indexArray, 1)
       );
     }
-  }, [indexArray]);
+  }, [indexArray, atlas]);
 
   if (!atlas) return <Html center>Generating Atlas...</Html>;
 
