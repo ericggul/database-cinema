@@ -41,6 +41,59 @@ const formatId = (year, month, hour) => {
   return `${year}_${mm}_${hh}`;
 };
 
+const estimateDataUrlBytes = (dataUrl) => {
+  if (!dataUrl || typeof dataUrl !== "string") return null;
+  const commaIndex = dataUrl.indexOf(",");
+  if (commaIndex < 0) return null;
+  const base64 = dataUrl.slice(commaIndex + 1);
+  return Math.round((base64.length * 3) / 4);
+};
+
+const loadImageFromObjectUrl = (objectUrl) =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Failed to load image for compression"));
+    img.src = objectUrl;
+  });
+
+const compressImageToWebp = async (src, options = {}) => {
+  const { maxEdge = 896, quality = 0.74 } = options;
+  let objectUrl;
+  try {
+    const resp = await fetch(src);
+    const sourceBlob = await resp.blob();
+    objectUrl = URL.createObjectURL(sourceBlob);
+    const img = await loadImageFromObjectUrl(objectUrl);
+
+    const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+    const targetWidth = Math.max(1, Math.round(img.width * scale));
+    const targetHeight = Math.max(1, Math.round(img.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+    const compressedUrl = canvas.toDataURL("image/webp", quality);
+
+    const compressedBytes = estimateDataUrlBytes(compressedUrl);
+    if (compressedBytes && compressedBytes < sourceBlob.size) {
+      return { imageUrl: compressedUrl, bytes: compressedBytes };
+    }
+
+    return { imageUrl: src, bytes: sourceBlob.size, fallback: true };
+  } catch (err) {
+    console.error("Image compression failed, using original", err);
+    return { imageUrl: src, fallback: true };
+  } finally {
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+};
+
 
 const AXES = ["year", "month", "hour"];
 
@@ -148,6 +201,11 @@ export default function SceneTransformerDualAxis() {
         });
         const data = await response.json();
         if (response.ok) {
+          let finalImageUrl = data.imageUrl;
+          if (data.imageUrl) {
+            const optimized = await compressImageToWebp(data.imageUrl, { maxEdge: 896, quality: 0.74 });
+            finalImageUrl = optimized?.imageUrl || data.imageUrl;
+          }
           const ended = Date.now();
           setBatch((prev) =>
             prev.map((p, idx) =>
@@ -155,7 +213,7 @@ export default function SceneTransformerDualAxis() {
                 ? {
                     ...p,
                     status: "done",
-                    imageUrl: data.imageUrl,
+                    imageUrl: finalImageUrl,
                     durationMs: p.startedAt ? ended - p.startedAt : null,
                   }
                 : p

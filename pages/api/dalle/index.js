@@ -27,11 +27,13 @@ export default async function handler(req, res) {
     });
 
     const b64 = result?.data?.[0]?.b64_json;
-    if (!b64) {
+    const imageUrl = b64 ? `data:image/png;base64,${b64}` : null;
+
+    if (!imageUrl) {
       return res.status(500).json({ message: "No image generated" });
     }
 
-    return res.status(200).json({ imageUrl: `data:image/png;base64,${b64}` });
+    return res.status(200).json({ imageUrl });
   } catch (error) {
     console.error("Error generating image:", error);
     return res.status(500).json({ message: "Error generating image", error: error.message });
