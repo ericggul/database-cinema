@@ -391,10 +391,10 @@ function useRecorder() {
   const startRecording = (canvas) => {
     if (!canvas) return;
     
-    const stream = canvas.captureStream(60); 
+    const stream = canvas.captureStream(30); // Reduce to 30 FPS for stability
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType: 'video/webm;codecs=vp9',
-      videoBitsPerSecond: 5000000 
+      videoBitsPerSecond: 15000000 // 15 Mbps (sufficient for this res)
     });
 
     mediaRecorderRef.current = mediaRecorder;
@@ -446,61 +446,46 @@ export default function VisInteractive() {
     cubeSize: { value: 1.0, min: 0.1, max: 2.0, step: 0.1 },
   });
 
-  // Window width for scaling
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1000);
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const scale = recordMode ? windowWidth / 6480 : 1;
-
   return (
     <Container>
       <Leva collapsed={false} /> 
       
       <div style={{
-        width: '100vw',
-        height: recordMode ? `${432 * scale}px` : '100vh',
-        overflow: 'hidden',
-        position: 'relative',
+        width: recordMode ? '3000px' : '100vw',
+        height: recordMode ? '432px' : '100vh',
+        // Center the wide container
+        position: recordMode ? 'absolute' : 'relative',
+        left: recordMode ? '50%' : 'auto',
+        transform: recordMode ? 'translateX(-50%)' : 'none',
+        
+        border: recordMode ? '2px solid red' : 'none',
+        transition: 'all 0.3s ease',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        border: recordMode ? '2px solid red' : 'none',
-        transition: 'height 0.3s ease',
-        background: '#000', // Black background for letterboxing effect
+        zIndex: 0 // Ensure it's behind overlay
       }}>
-        <div style={{
-          width: recordMode ? '6480px' : '100vw',
-          height: recordMode ? '432px' : '100vh',
-          transform: recordMode ? `scale(${scale})` : 'none',
-          transformOrigin: 'center center',
-          flexShrink: 0, 
-        }}>
-          <Canvas 
-            gl={{ preserveDrawingBuffer: true }}
-            onCreated={({ gl }) => {
-              window._canvas = gl.domElement;
-            }}
-          >
-            <color attach="background" args={['#111']} />
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} />
-            
-            <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
+        <Canvas 
+          dpr={2} // Force high DPI for better quality
+          gl={{ preserveDrawingBuffer: true }}
+          onCreated={({ gl }) => {
+            window._canvas = gl.domElement;
+          }}
+        >
+          <color attach="background" args={['#111']} />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} />
+          
+          <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
 
-            <AtlasCubeGrid 
-              onHover={setHovered} 
-              onClick={setSelected} 
-              config={config}
-            />
-            
-            <OrbitControls enableDamping target={[0, 0, 0]} />
-          </Canvas>
-        </div>
+          <AtlasCubeGrid 
+            onHover={setHovered} 
+            onClick={setSelected} 
+            config={config}
+          />
+          
+          <OrbitControls enableDamping target={[0, 0, 0]} />
+        </Canvas>
       </div>
 
       <Overlay>
@@ -532,7 +517,7 @@ export default function VisInteractive() {
             }}
             style={{ padding: '8px', cursor: 'pointer' }}
           >
-            {recordMode ? "Exit Record Mode" : "Enter Record Mode (6480x432)"}
+            {recordMode ? "Exit Record Mode" : "Enter Record Mode (3000x432)"}
           </button>
           
           {recordMode && (
