@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import React, { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -194,33 +194,22 @@ function RubiksGrid({ onHover, onClick, isSolving, setIsSolving }) {
     }).catch(err => console.error("Atlas generation failed", err));
   }, []);
 
-  // Initialize: Scramble instantly
-  useEffect(() => {
-    if (!atlas) return;
-    scramble();
-    updateInstancedMesh();
-  }, [atlas]);
-
-  const scramble = () => {
-    const moves = [];
-    // Generate 60 random moves
-    for (let i = 0; i < 60; i++) {
-      const axis = ['x', 'y', 'z'][Math.floor(Math.random() * 3)];
-      const index = Math.floor(Math.random() * N); // 0..11
-      const dir = Math.random() > 0.5 ? 1 : -1; // 90 deg or -90 deg
-      moves.push({ axis, index, dir });
-    }
+  // Helper functions defined before use to avoid ReferenceError
+  const updateInstancedMesh = useCallback(() => {
+    if (!meshRef.current) return;
+    const tempObj = new THREE.Object3D();
     
-    // Apply instantly
-    moves.forEach(move => applyMoveInstant(move));
+    cubesRef.current.forEach((c, i) => {
+      tempObj.position.copy(c.position);
+      tempObj.quaternion.copy(c.quaternion);
+      tempObj.updateMatrix();
+      meshRef.current.setMatrixAt(i, tempObj.matrix);
+    });
     
-    // Store reverse moves for solving
-    // We need to reverse the order AND the direction
-    const solveMoves = moves.reverse().map(m => ({ ...m, dir: -m.dir }));
-    moveQueueRef.current = solveMoves;
-  };
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, []);
 
-  const applyMoveInstant = (move) => {
+  const applyMoveInstant = useCallback((move) => {
     const { axis, index, dir } = move;
     const angle = dir * Math.PI / 2;
     const rotation = new THREE.Quaternion();
@@ -257,21 +246,33 @@ function RubiksGrid({ onHover, onClick, isSolving, setIsSolving }) {
       c.ly = Math.round(vec.y + center);
       c.lz = Math.round(vec.z + center);
     });
-  };
+  }, []);
 
-  const updateInstancedMesh = () => {
-    if (!meshRef.current) return;
-    const tempObj = new THREE.Object3D();
+  const scramble = useCallback(() => {
+    const moves = [];
+    // Generate 60 random moves
+    for (let i = 0; i < 60; i++) {
+      const axis = ['x', 'y', 'z'][Math.floor(Math.random() * 3)];
+      const index = Math.floor(Math.random() * N); // 0..11
+      const dir = Math.random() > 0.5 ? 1 : -1; // 90 deg or -90 deg
+      moves.push({ axis, index, dir });
+    }
     
-    cubesRef.current.forEach((c, i) => {
-      tempObj.position.copy(c.position);
-      tempObj.quaternion.copy(c.quaternion);
-      tempObj.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObj.matrix);
-    });
+    // Apply instantly
+    moves.forEach(move => applyMoveInstant(move));
     
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  };
+    // Store reverse moves for solving
+    // We need to reverse the order AND the direction
+    const solveMoves = moves.reverse().map(m => ({ ...m, dir: -m.dir }));
+    moveQueueRef.current = solveMoves;
+  }, [applyMoveInstant]);
+
+  // Initialize: Scramble instantly
+  useEffect(() => {
+    if (!atlas) return;
+    scramble();
+    updateInstancedMesh();
+  }, [atlas, scramble, updateInstancedMesh]);
 
   // Animation Loop
   useFrame((state, delta) => {
@@ -287,11 +288,11 @@ function RubiksGrid({ onHover, onClick, isSolving, setIsSolving }) {
       progressRef.current = 0;
       
       // Human Touch: Random speed for each move
-      // Base speed 12, variance +/- 6 (Range: 6 to 18 moves/sec)
-      // Faster moves = higher number
-      currentMoveSpeedRef.current = 12.0 + (Math.random() - 0.5) * 12.0; 
+      // Base speed 20, variance +/- 15 (Range: 5 to 35 moves/sec)
+      // Very fast bursts mixed with slightly slower moves
+      currentMoveSpeedRef.current = 20.0 + (Math.random() - 0.5) * 30.0; 
       // Clamp minimum speed
-      if (currentMoveSpeedRef.current < 6.0) currentMoveSpeedRef.current = 6.0;
+      if (currentMoveSpeedRef.current < 5.0) currentMoveSpeedRef.current = 5.0;
     }
 
     // Animate current move
@@ -360,7 +361,7 @@ function RubiksGrid({ onHover, onClick, isSolving, setIsSolving }) {
       new THREE.InstancedBufferAttribute(indexArray, 1)
     );
     updateInstancedMesh();
-  }, [atlas]);
+  }, [atlas, updateInstancedMesh]);
 
   if (!atlas) return <Html center>Generating Atlas...</Html>;
 
@@ -520,7 +521,7 @@ export default function VisRubiks() {
               fontWeight: 'bold'
             }}
           >
-            {isSolving ? "Solving..." : "Start Solve (~5s)"}
+            {isSolving ? "Solving..." : "Start Solve (~3s)"}
           </button>
 
           <button 

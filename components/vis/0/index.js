@@ -112,11 +112,10 @@ function CubeGrid({ onHover, onClick }) {
 
 function TextureGroup({ texture, data, onHover, onClick }) {
   const meshRef = useRef();
-  const tempObject = new THREE.Object3D();
-
   useEffect(() => {
     if (!meshRef.current) return;
     
+    const tempObject = new THREE.Object3D();
     data.forEach((item, i) => {
       tempObject.position.set(item.x * 1.2, item.y * 1.2, item.z * 1.2); // 1.2 spacing
       tempObject.updateMatrix();

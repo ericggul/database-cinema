@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Container,

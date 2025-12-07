@@ -213,7 +213,8 @@ function AtlasCubeGrid({ onHover, onClick }) {
     );
     
     meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [atlas]); // Only update when atlas is ready (and thus we are ready to render)
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [atlas, indexArray, tempObject]); // Only update when atlas is ready (and thus we are ready to render)
 
   if (!atlas) return <Html center>Generating Atlas...</Html>;
 

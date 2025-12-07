@@ -4,6 +4,7 @@ import { OrbitControls, Html, PerspectiveCamera, OrthographicCamera } from "@rea
 import { useControls, Leva } from "leva";
 import * as THREE from "three";
 import styled from "styled-components";
+import { useSpring } from "@react-spring/three";
 
 // --- Constants ---
 const YEARS = Array.from({ length: 12 }, (_, i) => 1915 + (i * 10));
@@ -140,12 +141,78 @@ const AtlasMaterial = {
   `
 };
 
+// --- Layout Calculation Helpers ---
+const getOtherLayoutPositions = (type, count, N, spacing) => {
+  const positions = new Float32Array(count * 3);
+  
+  for (let i = 0; i < count; i++) {
+    let x, y, z;
+
+    switch (type) {
+      case 'Sphere': {
+        // Fibonacci Sphere
+        const phi = Math.acos(1 - 2 * (i + 0.5) / count);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+        const r = N * spacing * 0.6; 
+        
+        x = r * Math.sin(phi) * Math.cos(theta);
+        y = r * Math.sin(phi) * Math.sin(theta);
+        z = r * Math.cos(phi);
+        break;
+      }
+
+      case 'Cylinder': {
+        const r = N * spacing * 0.4;
+        const theta = (i / count) * Math.PI * 2 * 4; 
+        const h = (i / count) * N * spacing * 2 - (N * spacing);
+        
+        x = r * Math.cos(theta);
+        y = h;
+        z = r * Math.sin(theta);
+        break;
+      }
+
+      case 'Helix': {
+        const r = N * spacing * 0.3;
+        const theta = i * 0.2; 
+        const h = (i / count) * N * spacing * 3 - (N * spacing * 1.5);
+        
+        x = r * Math.cos(theta);
+        y = h;
+        z = r * Math.sin(theta);
+        break;
+      }
+
+      case 'Scatter': {
+        const seed = i * 123.45;
+        const rand = (n) => Math.sin(seed * n) * 43758.5453 % 1;
+        const range = N * spacing;
+        
+        x = (rand(1) - 0.5) * range * 2;
+        y = (rand(2) - 0.5) * range * 2;
+        z = (rand(3) - 0.5) * range * 2;
+        break;
+      }
+      
+      default: // Should not happen for Cube as it's handled separately
+        x = 0; y = 0; z = 0;
+    }
+
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
+  }
+  return positions;
+};
+
 function AtlasCubeGrid({ onHover, onClick, config }) {
   const meshRef = useRef();
   const [atlas, setAtlas] = useState(null);
   
-  const { N, spacing, cubeSize, doubleSide } = config;
+  const { N, spacing, cubeSize, doubleSide, layout } = config;
+  const count = N * N * N;
 
+  // --- Atlas Generation ---
   useEffect(() => {
     createAtlas(IMAGE_PATHS).then(data => {
       const texture = new THREE.CanvasTexture(data.canvas);
@@ -154,59 +221,126 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     }).catch(err => console.error("Atlas generation failed", err));
   }, []);
   
-  const { count, tempObject, indexArray } = useMemo(() => {
-    const count = N * N * N;
-    const tempObject = new THREE.Object3D();
+  // --- Data Preparation ---
+  const { indexArray } = useMemo(() => {
     const indexArray = new Float32Array(count);
-    
     let i = 0;
     for (let x = 0; x < N; x++) {
       for (let y = 0; y < N; y++) {
         for (let z = 0; z < N; z++) {
-          // Cycle through the 144 images (12 Years x 12 Hours)
-          // We map x to Year and z to Hour, repeating every 12 units
           const yearIdx = x % 12;
           const hourIdx = z % 12;
-          
           const atlasIndex = (yearIdx * 12) + hourIdx;
           indexArray[i] = atlasIndex;
           i++;
         }
       }
     }
-    
-    return { count, tempObject, indexArray };
-  }, [N]); // Re-calculate when N changes
+    return { indexArray };
+  }, [N, count]);
 
-  useEffect(() => {
-    if (!meshRef.current || !atlas) return;
-    
+  // --- Layout & Animation ---
+  
+  // 1. Canonical Cube Positions (Exact Match to Original)
+  const cubePositions = useMemo(() => {
+    const pos = new Float32Array(count * 3);
     let i = 0;
-    const offset = (N - 1) * spacing / 2; // Center the grid
-
+    const offset = (N - 1) * spacing / 2;
+    // EXACT original loop structure
     for (let x = 0; x < N; x++) {
       for (let y = 0; y < N; y++) {
         for (let z = 0; z < N; z++) {
-          const xPos = (x * spacing) - offset;
-          const yPos = (y * spacing) - offset;
-          const zPos = (z * spacing) - offset;
-          
-          tempObject.position.set(xPos, yPos, zPos);
-          tempObject.scale.set(cubeSize, cubeSize, cubeSize);
-          tempObject.updateMatrix();
-          meshRef.current.setMatrixAt(i, tempObject.matrix);
-          i++;
+           pos[i*3] = (x * spacing) - offset;
+           pos[i*3+1] = (y * spacing) - offset;
+           pos[i*3+2] = (z * spacing) - offset;
+           i++;
         }
       }
     }
+    return pos;
+  }, [N, spacing, count]);
+
+  // 2. Determine Target Positions
+  const targetPositions = useMemo(() => {
+    if (layout === 'Cube') return cubePositions;
+    return getOtherLayoutPositions(layout, count, N, spacing);
+  }, [layout, N, spacing, count, cubePositions]);
+
+  // 3. State for Animation
+  const currentPositions = useRef(null);
+  const startPositions = useRef(null);
+
+  // Initialize immediately to avoid 0,0,0 flash
+  if (!currentPositions.current || currentPositions.current.length !== count * 3) {
+    currentPositions.current = new Float32Array(targetPositions);
+    startPositions.current = new Float32Array(targetPositions);
+  }
+
+  // Spring for transition
+  const { t } = useSpring({
+    t: 1,
+    from: { t: 0 },
+    reset: true,
+    config: { mass: 1, tension: 120, friction: 20 },
+    onChange: () => {
+        // Trigger frame loop
+    }
+  });
+
+  // Capture start positions when layout changes
+  useEffect(() => {
+    if (currentPositions.current) {
+        startPositions.current.set(currentPositions.current);
+    }
+  }, [layout, N, spacing]); 
+
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame(() => {
+    if (!meshRef.current || !atlas) return;
+
+    const progress = t.get();
     
-    meshRef.current.geometry.setAttribute(
-      'aAtlasIndex',
-      new THREE.InstancedBufferAttribute(indexArray, 1)
-    );
+    for (let i = 0; i < count; i++) {
+      const ix = i * 3;
+      const iy = i * 3 + 1;
+      const iz = i * 3 + 2;
+
+      // Interpolate
+      const x = THREE.MathUtils.lerp(startPositions.current[ix], targetPositions[ix], progress);
+      const y = THREE.MathUtils.lerp(startPositions.current[iy], targetPositions[iy], progress);
+      const z = THREE.MathUtils.lerp(startPositions.current[iz], targetPositions[iz], progress);
+
+      // Update current positions ref for next start point
+      currentPositions.current[ix] = x;
+      currentPositions.current[iy] = y;
+      currentPositions.current[iz] = z;
+
+      tempObject.position.set(x, y, z);
+      tempObject.scale.set(cubeSize, cubeSize, cubeSize);
+      
+      if (layout === 'Sphere' || layout === 'Cylinder' || layout === 'Helix') {
+         tempObject.lookAt(0, 0, 0);
+      } else {
+         tempObject.rotation.set(0, 0, 0);
+      }
+
+      tempObject.updateMatrix();
+      meshRef.current.setMatrixAt(i, tempObject.matrix);
+    }
     
     meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [atlas, N, spacing, cubeSize]); // Update positions when config changes
+  });
+
+  // Initial Attribute Setup
+  useEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.geometry.setAttribute(
+        'aAtlasIndex',
+        new THREE.InstancedBufferAttribute(indexArray, 1)
+      );
+    }
+  }, [indexArray]);
 
   if (!atlas) return <Html center>Generating Atlas...</Html>;
 
@@ -219,7 +353,6 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
         const id = e.instanceId;
         
         // Reverse engineer indices
-        // i = x*(N*N) + y*N + z
         const z = id % N;
         const y = Math.floor((id / N)) % N;
         const x = Math.floor(id / (N * N));
@@ -259,7 +392,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     >
       <boxGeometry args={[1, 1, 1]} />
       <shaderMaterial
-        key={doubleSide ? 'double' : 'front'} // Force re-render on side change
+        key={doubleSide ? 'double' : 'front'} 
         uniforms={{
           uAtlas: { value: atlas.texture },
           uGridSize: { value: new THREE.Vector2(atlas.cols, atlas.rows) }
@@ -330,6 +463,7 @@ export default function VisInteractive() {
 
   // --- Leva Controls ---
   const config = useControls({
+    layout: { options: ['Cube', 'Sphere', 'Cylinder', 'Helix', 'Scatter'], value: 'Cube' },
     N: { value: 12, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
     spacing: { value: 1.2, min: 0.1, max: 5.0, step: 0.1 },
     cubeSize: { value: 1.0, min: 0.1, max: 2.0, step: 0.1 },
@@ -339,7 +473,7 @@ export default function VisInteractive() {
 
   return (
     <Container>
-      <Leva collapsed={false} /> {/* Explicitly render Leva panel */}
+      <Leva collapsed={false} /> 
       
       <div style={{
         width: recordMode ? '1840px' : '100vw',
@@ -375,7 +509,6 @@ export default function VisInteractive() {
           />
           
           <OrbitControls enableDamping target={[0, 0, 0]} />
-          {/* GridHelper removed as requested */}
         </Canvas>
       </div>
 
@@ -384,6 +517,7 @@ export default function VisInteractive() {
         <Info>
           Grid: {config.N} x {config.N} x {config.N}<br/>
           Total: {config.N ** 3}<br/>
+          Layout: {config.layout}<br/>
           <br/>
           {activeItem ? (
             <>

@@ -200,7 +200,8 @@ function AtlasCubeGrid({ onHover, onClick }) {
     );
     
     meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [atlas]);
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [atlas, indexArray, tempObject]);
 
   if (!atlas) return <Html center>Generating Atlas (144 images)...</Html>;
 
