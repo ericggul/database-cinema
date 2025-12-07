@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, PerspectiveCamera, OrthographicCamera } from "@react-three/drei";
 import { useControls, Leva } from "leva";
 import * as THREE from "three";
-import styled from "styled-components";
+
 import { useSpring } from "@react-spring/three";
 
 // --- Constants ---
@@ -27,38 +27,7 @@ for (let y = 0; y < 12; y++) {
 
 const IMAGE_PATHS = IMAGE_FILES.map(f => `/generated-img/July_불광천/${f}`);
 
-// --- Styles ---
-const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
-  background: #111;
-  color: white;
-  position: relative;
-`;
-
-const Overlay = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 20px;
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 10;
-  max-width: 300px;
-`;
-
-const Title = styled.h1`
-  font-size: 1.2rem;
-  margin: 0 0 10px 0;
-  color: #fff;
-`;
-
-const Info = styled.div`
-  font-size: 0.9rem;
-  color: #ccc;
-  line-height: 1.5;
-`;
+import { Container, Overlay, Title, Info } from "./styles";
 
 // --- Atlas Generator ---
 async function createAtlas(urls) {
@@ -142,7 +111,7 @@ const AtlasMaterial = {
 };
 
 // --- Layout Calculation Helpers ---
-const getOtherLayoutPositions = (type, count, N, spacing) => {
+const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
   const positions = new Float32Array(count * 3);
   
   for (let i = 0; i < count; i++) {
@@ -162,9 +131,26 @@ const getOtherLayoutPositions = (type, count, N, spacing) => {
       }
 
       case 'Cylinder': {
+        // Dynamic Cylinder Layout
+        // 1. Calculate Radius
         const r = N * spacing * 0.4;
-        const theta = (i / count) * Math.PI * 2 * 4; 
-        const h = (i / count) * N * spacing * 2 - (N * spacing);
+        
+        // 2. Calculate Circumference
+        const circumference = 2 * Math.PI * r;
+        
+        // 3. Determine items per turn (based on cubeSize + gap)
+        const itemWidth = cubeSize * 1.2; // 20% gap
+        const itemsPerTurn = circumference / itemWidth;
+        
+        // 4. Calculate total turns needed
+        const totalTurns = count / itemsPerTurn;
+        
+        // 5. Calculate Height
+        const verticalSpacing = cubeSize * 1.2;
+        const totalHeight = totalTurns * verticalSpacing;
+        
+        const theta = (i / count) * Math.PI * 2 * totalTurns;
+        const h = (i / count) * totalHeight - (totalHeight / 2);
         
         x = r * Math.cos(theta);
         y = h;
@@ -209,7 +195,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   const meshRef = useRef();
   const [atlas, setAtlas] = useState(null);
   
-  const { N, spacing, cubeSize, doubleSide, layout } = config;
+  const { N, spacing, cubeSize, layout } = config;
   const count = N * N * N;
 
   // --- Atlas Generation ---
@@ -251,8 +237,8 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   // 2. Determine Target Positions
   const targetPositions = useMemo(() => {
     if (layout === 'Cube') return cubePositions;
-    return getOtherLayoutPositions(layout, count, N, spacing);
-  }, [layout, N, spacing, count, cubePositions]);
+    return getOtherLayoutPositions(layout, count, N, spacing, cubeSize);
+  }, [layout, N, spacing, count, cubePositions, cubeSize]);
 
   // 3. State for Animation
   const currentPositions = useRef(null);
@@ -265,22 +251,25 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   }
 
   // Spring for transition
-  const { t } = useSpring({
+  const [{ t, smoothSize }, api] = useSpring(() => ({
     t: 1,
-    from: { t: 0 },
-    reset: true,
+    smoothSize: cubeSize,
     config: { mass: 1, tension: 120, friction: 20 },
-    onChange: () => {
-        // Trigger frame loop
-    }
-  });
+  }));
+
+  // Update smoothSize when cubeSize changes
+  useEffect(() => {
+    api.start({ smoothSize: cubeSize });
+  }, [cubeSize, api]);
 
   // Capture start positions when layout changes
   useEffect(() => {
     if (currentPositions.current) {
         startPositions.current.set(currentPositions.current);
+        // Reset animation
+        api.start({ t: 1, from: { t: 0 }, reset: true });
     }
-  }, [layout, N, spacing]); 
+  }, [layout, N, spacing, api]); 
 
   const tempObject = useMemo(() => new THREE.Object3D(), []);
 
@@ -288,6 +277,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     if (!meshRef.current || !atlas) return;
 
     const progress = t.get();
+    const currentSize = smoothSize.get();
     
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
@@ -305,7 +295,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
       currentPositions.current[iz] = z;
 
       tempObject.position.set(x, y, z);
-      tempObject.scale.set(cubeSize, cubeSize, cubeSize);
+      tempObject.scale.set(currentSize, currentSize, currentSize);
       
       if (layout === 'Sphere' || layout === 'Cylinder' || layout === 'Helix') {
          tempObject.lookAt(0, 0, 0);
@@ -380,14 +370,13 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     >
       <boxGeometry args={[1, 1, 1]} />
       <shaderMaterial
-        key={doubleSide ? 'double' : 'front'} 
         uniforms={{
           uAtlas: { value: atlas.texture },
           uGridSize: { value: new THREE.Vector2(atlas.cols, atlas.rows) }
         }}
         vertexShader={AtlasMaterial.vertexShader}
         fragmentShader={AtlasMaterial.fragmentShader}
-        side={doubleSide ? THREE.DoubleSide : THREE.FrontSide}
+        side={THREE.FrontSide}
       />
     </instancedMesh>
   );
@@ -452,11 +441,9 @@ export default function VisInteractive() {
   // --- Leva Controls ---
   const config = useControls({
     layout: { options: ['Cube', 'Sphere', 'Cylinder', 'Helix', 'Scatter'], value: 'Cube' },
-    N: { value: 12, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
-    spacing: { value: 1.2, min: 0.1, max: 5.0, step: 0.1 },
+    N: { value: 24, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
+    spacing: { value: 3, min: 0.1, max: 5.0, step: 0.1 },
     cubeSize: { value: 1.0, min: 0.1, max: 2.0, step: 0.1 },
-    cameraType: { options: ['Perspective', 'Orthographic'], value: 'Perspective' },
-    doubleSide: { value: false, label: "Double Sided" }
   });
 
   return (
@@ -464,7 +451,7 @@ export default function VisInteractive() {
       <Leva collapsed={false} /> 
       
       <div style={{
-        width: recordMode ? '1840px' : '100vw',
+        width: recordMode ? '6480px' : '100vw',
         height: recordMode ? '432px' : '100vh',
         margin: recordMode ? '0 auto' : '0',
         border: recordMode ? '2px solid red' : 'none',
@@ -484,11 +471,7 @@ export default function VisInteractive() {
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           
-          {config.cameraType === 'Perspective' ? (
-            <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
-          ) : (
-            <OrthographicCamera makeDefault position={[20, 20, 20]} zoom={20} />
-          )}
+          <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
 
           <AtlasCubeGrid 
             onHover={setHovered} 
@@ -521,10 +504,15 @@ export default function VisInteractive() {
         </Info>
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', pointerEvents: 'auto' }}>
           <button 
-            onClick={() => setRecordMode(!recordMode)}
+            onClick={() => {
+              if (recordMode && recording) {
+                stopRecording();
+              }
+              setRecordMode(!recordMode);
+            }}
             style={{ padding: '8px', cursor: 'pointer' }}
           >
-            {recordMode ? "Exit Record Mode" : "Enter Record Mode (1840x432)"}
+            {recordMode ? "Exit Record Mode" : "Enter Record Mode (6480x432)"}
           </button>
           
           {recordMode && (

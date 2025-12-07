@@ -525,7 +525,12 @@ export default function VisRubiks() {
           </button>
 
           <button 
-            onClick={() => setRecordMode(!recordMode)}
+            onClick={() => {
+              if (recordMode && recording) {
+                stopRecording();
+              }
+              setRecordMode(!recordMode);
+            }}
             style={{ padding: '8px', cursor: 'pointer' }}
           >
             {recordMode ? "Exit Record Mode" : "Enter Record Mode (1840x432)"}

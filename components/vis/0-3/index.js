@@ -363,7 +363,12 @@ export default function VisBulgwangcheon() {
         </Info>
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', pointerEvents: 'auto' }}>
           <button 
-            onClick={() => setRecordMode(!recordMode)}
+            onClick={() => {
+              if (recordMode && recording) {
+                stopRecording();
+              }
+              setRecordMode(!recordMode);
+            }}
             style={{ padding: '8px', cursor: 'pointer' }}
           >
             {recordMode ? "Exit Record Mode" : "Enter Record Mode (1840x432)"}
