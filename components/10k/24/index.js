@@ -41,67 +41,14 @@ const formatId = (year, month, hour) => {
   return `${year}_${mm}_${hh}`;
 };
 
-const estimateDataUrlBytes = (dataUrl) => {
-  if (!dataUrl || typeof dataUrl !== "string") return null;
-  const commaIndex = dataUrl.indexOf(",");
-  if (commaIndex < 0) return null;
-  const base64 = dataUrl.slice(commaIndex + 1);
-  return Math.round((base64.length * 3) / 4);
-};
-
-const loadImageFromObjectUrl = (objectUrl) =>
-  new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Failed to load image for compression"));
-    img.src = objectUrl;
-  });
-
-const compressImageToWebp = async (src, options = {}) => {
-  const { maxEdge = 896, quality = 0.74 } = options;
-  let objectUrl;
-  try {
-    const resp = await fetch(src);
-    const sourceBlob = await resp.blob();
-    objectUrl = URL.createObjectURL(sourceBlob);
-    const img = await loadImageFromObjectUrl(objectUrl);
-
-    const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
-    const targetWidth = Math.max(1, Math.round(img.width * scale));
-    const targetHeight = Math.max(1, Math.round(img.height * scale));
-
-    const canvas = document.createElement("canvas");
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
-    const compressedUrl = canvas.toDataURL("image/webp", quality);
-
-    const compressedBytes = estimateDataUrlBytes(compressedUrl);
-    if (compressedBytes && compressedBytes < sourceBlob.size) {
-      return { imageUrl: compressedUrl, bytes: compressedBytes };
-    }
-
-    return { imageUrl: src, bytes: sourceBlob.size, fallback: true };
-  } catch (err) {
-    console.error("Image compression failed, using original", err);
-    return { imageUrl: src, fallback: true };
-  } finally {
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    }
-  }
-};
-
 
 const AXES = ["year", "month", "hour"];
 
 export default function SceneTransformerDualAxis() {
-  const [axisA, setAxisA] = useState("month");
+  const [axisA, setAxisA] = useState("year");
   const [axisB, setAxisB] = useState("hour");
   const [anchorYear, setAnchorYear] = useState(2025);
-  const [anchorMonth, setAnchorMonth] = useState("July");
+  const [anchorMonth, setAnchorMonth] = useState("January");
   const [anchorHour, setAnchorHour] = useState("12:00");
   const [location, setLocation] = useState("bulgwangcheon");
   const [quality, setQuality] = useState("low");
@@ -125,7 +72,29 @@ export default function SceneTransformerDualAxis() {
   const buildPrompt = (year, month, hour) => {
     const hourText = `${hour} local time`;
     const hourInt = Number(String(hour).split(":")[0]);
-    const meridiem = hourInt < 12 ? "morning" : "evening";
+    const meridiem =
+      hourInt === 0
+        ? "midnight (00:00, 24-hour time)"
+        : hourInt === 12
+        ? "midday (12:00, 24-hour time)"
+        : hourInt < 12
+        ? `morning (${hourInt}:00)`
+        : `evening (${hourInt}:00)`;
+
+    const timeLighting =
+      hourInt === 0
+        ? "very dark pre-dawn/midnight with minimal ambient light, artificial lights only"
+        : hourInt < 6
+        ? "pre-dawn faint light, very low ambient brightness"
+        : hourInt < 12
+        ? "morning light, increasing brightness"
+        : hourInt === 12
+        ? "bright midday sun at 12:00 (solar noon feel)"
+        : hourInt < 18
+        ? "afternoon light, warm low sun toward late afternoon"
+        : hourInt < 21
+        ? "evening light, golden-to-blue hour transition"
+        : "night lighting, dark sky with artificial lights";
 
     const baseLocation =
       location === "bulgwangcheon"
@@ -145,9 +114,12 @@ export default function SceneTransformerDualAxis() {
     return [
       "Ultra-realistic, photographic quality.",
       baseLocation + ".",
-      `Depict ${month} ${year}, ${hourText} (${hourInt}:00 ${meridiem}), with era-accurate Seoul skyline/architecture for that year.`,
+      `Depict ${month} ${year}, ${hourText} (${meridiem}), with era-accurate Seoul skyline/architecture for that year.`,
+      "Use strict 24-hour notation: 00:00 is midnight (dark), 12:00 is midday/noon (bright).",
+      timeLighting + ".",
       "Reflect the correct season for that month (foliage, sky, atmosphere, clothing cues if visible).",
       "Lighting/sky must match time-of-day and season: bright daylight for midday; warm low sun for late afternoon; dark night with artificial lights for 22:00; pre-dawn faint light for early hours.",
+      "Do not render any text, signage, or watermarks in the image.",
       "Maintain the exact described vantage and framing; do not alter camera angle or composition.",
       additionalPrompt ? `Additional directives: ${additionalPrompt}` : "",
     ].filter(Boolean).join(" ");
@@ -201,11 +173,6 @@ export default function SceneTransformerDualAxis() {
         });
         const data = await response.json();
         if (response.ok) {
-          let finalImageUrl = data.imageUrl;
-          if (data.imageUrl) {
-            const optimized = await compressImageToWebp(data.imageUrl, { maxEdge: 896, quality: 0.74 });
-            finalImageUrl = optimized?.imageUrl || data.imageUrl;
-          }
           const ended = Date.now();
           setBatch((prev) =>
             prev.map((p, idx) =>
@@ -213,7 +180,7 @@ export default function SceneTransformerDualAxis() {
                 ? {
                     ...p,
                     status: "done",
-                    imageUrl: finalImageUrl,
+                    imageUrl: data.imageUrl,
                     durationMs: p.startedAt ? ended - p.startedAt : null,
                   }
                 : p
