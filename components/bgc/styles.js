@@ -87,7 +87,7 @@ export const BottomControls = styled.div`
   align-items: center;
   pointer-events: auto;
   width: 100%;
-  margin-bottom: 20px; /* Space from bottom */
+  margin-bottom: 0px; /* Space from bottom */
   z-index: 20;
 `;
 
@@ -184,18 +184,21 @@ export const IconButton = styled.button`
 export const InfoIcon = styled.button`
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 18px;
   font-family: serif;
   font-style: italic;
   cursor: pointer;
   padding: 8px;
   display: flex;
+  font-weight: bold;
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
   width: 36px;
   height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
 
   &:hover {
     color: white;
@@ -205,13 +208,16 @@ export const InfoIcon = styled.button`
 export const ShakeButton = styled.button`
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
+
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
 
   &:hover {
     color: white;

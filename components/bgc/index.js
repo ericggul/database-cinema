@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls, Html, DeviceOrientationControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useSpring } from "@react-spring/three";
 import * as S from "./styles";
@@ -675,9 +675,11 @@ export default function BGCVisualization() {
             enableZoom={true} 
             minDistance={10} 
             maxDistance={300}
-            autoRotate={!useGyro && !focusTarget} // Stop auto-rotate when focused
+            autoRotate={!useGyro} // Keep rotating even if focused, unless gyro is on
             autoRotateSpeed={0.5}
+            enabled={!useGyro} // Disable OrbitControls when Gyro is on to avoid conflict
         />
+        {useGyro && <DeviceOrientationControls />}
         <CameraAnimator targetPosition={focusTarget} controlsRef={controlsRef} />
         
       </Canvas>
@@ -717,7 +719,7 @@ export default function BGCVisualization() {
                 
                 <S.ArrowButton onClick={handleNext}>→</S.ArrowButton>
                 
-                <S.ShakeButton onClick={handleGyroToggle} style={{ opacity: useGyro ? 1 : 0.5 }}>
+                <S.ShakeButton onClick={handleGyroToggle} style={{  }}>
                     <svg viewBox="0 0 24 24">
                         <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14zm-4.2-5.78v1.75l3.2-1.79c.05-.03.09-.07.12-.12.03-.04.05-.09.05-.15 0-.1-.05-.2-.13-.26l-3.24-2.16v1.75c-3.09-.46-4.63-2.79-4.63-2.79 1.1 3.72 4.63 3.77 4.63 3.77z"/>
                     </svg>
