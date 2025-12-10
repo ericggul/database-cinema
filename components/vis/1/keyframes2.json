@@ -16,8 +16,9 @@
         "config": {
             "layout": "Cube",
             "N": 24,
-            "spacing": 3,
-            "startHour": 0
+            "spacing": 3.0,
+            "cubeSize": 1.0,
+            "startHour": 12
         }
     },
     {
@@ -37,8 +38,9 @@
         "config": {
             "layout": "Elliptic Cylinder",
             "N": 24,
-            "spacing": 3,
-            "startHour": 2
+            "spacing": 2.5,
+            "cubeSize": 1.2,
+            "startHour": 12
         }
     },
     {
@@ -58,8 +60,9 @@
         "config": {
             "layout": "Parabolic Cylinder",
             "N": 24,
-            "spacing": 3,
-            "startHour": 4
+            "spacing": 2.5,
+            "cubeSize": 1.2,
+            "startHour": 12
         }
     },
     {
@@ -79,7 +82,8 @@
         "config": {
             "layout": "Paraboloidal",
             "N": 24,
-            "spacing": 3,
+            "spacing": 2.8,
+            "cubeSize": 1.1,
             "startHour": 6
         }
     },
@@ -100,7 +104,8 @@
         "config": {
             "layout": "Ellipsoidal",
             "N": 24,
-            "spacing": 3,
+            "spacing": 2.2,
+            "cubeSize": 1.3,
             "startHour": 8
         }
     },
@@ -121,7 +126,8 @@
         "config": {
             "layout": "Oblate Spheroidal",
             "N": 24,
-            "spacing": 3,
+            "spacing": 2.4,
+            "cubeSize": 1.2,
             "startHour": 10
         }
     },
@@ -142,7 +148,8 @@
         "config": {
             "layout": "Prolate Spheroidal",
             "N": 24,
-            "spacing": 3,
+            "spacing": 2.4,
+            "cubeSize": 1.2,
             "startHour": 12
         }
     },
@@ -163,7 +170,8 @@
         "config": {
             "layout": "Bispherical",
             "N": 24,
-            "spacing": 3,
+            "spacing": 2.8,
+            "cubeSize": 1.0,
             "startHour": 14
         }
     },
@@ -184,8 +192,9 @@
         "config": {
             "layout": "Conical",
             "N": 24,
-            "spacing": 3,
-            "startHour": 16
+            "spacing": 3.0,
+            "cubeSize": 1.0,
+            "startHour": 12
         }
     },
     {
@@ -205,8 +214,9 @@
         "config": {
             "layout": "Sphere",
             "N": 24,
-            "spacing": 3,
-            "startHour": 18
+            "spacing": 2.0,
+            "cubeSize": 0.8,
+            "startHour": 12
         }
     },
     {
@@ -226,8 +236,9 @@
         "config": {
             "layout": "Cube",
             "N": 24,
-            "spacing": 3,
-            "startHour": 20
+            "spacing": 3.0,
+            "cubeSize": 1.0,
+            "startHour": 12
         }
     }
 ]

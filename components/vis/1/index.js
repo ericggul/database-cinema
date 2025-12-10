@@ -111,13 +111,14 @@ const AtlasMaterial = {
 };
 
 // --- Layout Calculation Helpers ---
-const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
+const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1, startHour = 0) => {
   const positions = new Float32Array(count * 3);
   let i = 0;
 
-  // Helper for volumetric mapping
-  // We iterate x, y, z from 0 to N-1
-  
+  // Calculate offset based on startHour (0-24 cycle)
+  // We want a continuous flow, so we normalize startHour to 0-1 range
+  const timeOffset = startHour / 24.0;
+
   for (let ix = 0; ix < N; ix++) {
     for (let iy = 0; iy < N; iy++) {
       for (let iz = 0; iz < N; iz++) {
@@ -126,21 +127,32 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
         // Normalized coordinates (0 to 1)
         const u0 = ix / (N - 1);
         const v0 = iy / (N - 1);
-        const w0 = iz / (N - 1);
+        
+        // Apply time offset to w (Z-axis)
+        // We use modulo 1.0 to wrap around for continuous flow
+        let w0 = (iz / N + timeOffset) % 1.0;
+        if (w0 < 0) w0 += 1.0;
 
         // Centered coordinates (-1 to 1)
         const uc = (ix / (N - 1)) * 2 - 1;
         const vc = (iy / (N - 1)) * 2 - 1;
-        const wc = (iz / (N - 1)) * 2 - 1;
+        const wc = w0 * 2 - 1; // Map 0..1 to -1..1
 
         const scale = N * spacing * 0.5;
 
         switch (type) {
           case 'Sphere': {
             // Reverted to Fibonacci Sphere (Linear Layout)
-            // This ignores the volumetric grid structure for placement to prevent overlap
-            const phi = Math.acos(1 - 2 * (i + 0.5) / count);
-            const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+            // For linear layouts, we can just shift the index 'i'
+            // But 'i' is linear 0..count. 
+            // Let's map 'w0' shift to a linear shift?
+            // Actually, for Sphere/Cylinder/Scatter which ignore u,v,w loops:
+            
+            // We can add a "phase" shift to the generation logic
+            const effectiveI = (i + (timeOffset * count)) % count;
+            
+            const phi = Math.acos(1 - 2 * (effectiveI + 0.5) / count);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * effectiveI;
             const r = N * spacing * 0.6; 
             
             x = r * Math.sin(phi) * Math.cos(theta);
@@ -151,6 +163,8 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
 
           case 'Cylinder': {
             // Reverted to Dynamic Cylinder Layout (Linear Layout)
+            const effectiveI = (i + (timeOffset * count)) % count;
+
             const r = N * spacing * 0.4;
             const circumference = 2 * Math.PI * r;
             const itemWidth = cubeSize * 1.2; 
@@ -158,8 +172,8 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
             const totalTurns = count / itemsPerTurn;
             const totalHeight = totalTurns * (cubeSize * 1.2);
             
-            const theta = (i / count) * Math.PI * 2 * totalTurns;
-            const h = (i / count) * totalHeight - (totalHeight / 2);
+            const theta = (effectiveI / count) * Math.PI * 2 * totalTurns;
+            const h = (effectiveI / count) * totalHeight - (totalHeight / 2);
             
             x = r * Math.cos(theta);
             y = h;
@@ -169,7 +183,10 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
 
           case 'Scatter': {
              // Deterministic random based on index
-             const seed = i * 123.45;
+             // Shift index
+             const effectiveI = Math.floor((i + (timeOffset * count)) % count);
+             
+             const seed = effectiveI * 123.45;
              const rand = (n) => Math.sin(seed * n) * 43758.5453 % 1;
              const range = N * spacing;
              
@@ -300,7 +317,8 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
              
              // Discrete layer offset based on 'w' (iz)
              // We push items out by 'cubeSize' + padding for each layer
-             const layerOffset = iz * (cubeSize * 1.5); 
+             // Use w0 (normalized 0-1) for continuous offset
+             const layerOffset = w0 * N * (cubeSize * 1.5); 
              
              const r = baseR + layerOffset; 
              const theta = v0 * Math.PI * 2;
@@ -313,9 +331,12 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1) => {
           
           default: // Cube
              const offset = (N - 1) * spacing / 2;
+             // Apply z-shift for Cube
+             const z_shifted = (w0 * (N-1) * spacing) - offset;
+             
              x = (ix * spacing) - offset;
              y = (iy * spacing) - offset;
-             z = (iz * spacing) - offset;
+             z = z_shifted;
         }
 
         positions[i * 3] = x;
@@ -353,7 +374,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     const offset = (N - 1) * spacing / 2;
     
     // Calculate hour offset index (0-11) from startHour (0, 2, ..., 22)
-    const startHourIdx = startHour / 2;
+    const startHourIdx = Math.floor(startHour / 2);
 
     for (let x = 0; x < N; x++) {
       for (let y = 0; y < N; y++) {
@@ -378,9 +399,9 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
 
   // 2. Determine Target Positions
   const targetPositions = useMemo(() => {
-    if (layout === 'Cube') return cubePositions;
-    return getOtherLayoutPositions(layout, count, N, spacing, cubeSize);
-  }, [layout, N, spacing, count, cubePositions, cubeSize]);
+    // Pass startHour to layout generator
+    return getOtherLayoutPositions(layout, count, N, spacing, cubeSize, startHour);
+  }, [layout, N, spacing, count, cubePositions, cubeSize, startHour]);
 
   // 3. State for Animation
   const currentPositions = useRef(null);
@@ -533,7 +554,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
 import keyframes from "./keyframes2.json";
 
 // --- Animation Controller ---
-function AnimationController({ isPlaying, time, setConfig, setCamera, isHeartbeat }) {
+function AnimationController({ isPlaying, time, setConfig, setCamera }) {
   const { camera } = useThree();
   
   // Reusable vectors to avoid GC
@@ -542,26 +563,7 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, isHeartbea
   const vecC = useMemo(() => new THREE.Vector3(), []);
   
   useFrame(() => {
-    // Heartbeat Logic (Independent of keyframe animation)
-    let currentCubeSize = 1.0; // Default
-    if (isHeartbeat) {
-       // 0.5Hz Heartbeat (2s period): 1.0 to 2.0
-       // Function: Smoother sine-based pulse
-       
-       const t = isPlaying ? time.current : (performance.now() / 1000);
-       // Use PI * t for 2-second period (0.5Hz)
-       // Use power of 0.5 for a "breathing" effect (stays expanded longer)
-       const pulse = Math.pow((1 + Math.sin(Math.PI * t * (2/5))) / 2, 0.5); 
-       currentCubeSize = 1.0 + (1.0 * pulse);
-    }
-
-    if (!isPlaying) {
-        // If only heartbeat is playing, we still need to update config
-        if (isHeartbeat) {
-             setConfig({ cubeSize: currentCubeSize });
-        }
-        return;
-    }
+    if (!isPlaying) return;
 
     // Find current keyframe segment
     const totalDuration = keyframes[keyframes.length - 1].time;
@@ -613,14 +615,14 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, isHeartbea
     // Interpolate Config
     const N = THREE.MathUtils.lerp(startFrame.config.N, endFrame.config.N, easedProgress);
     const spacing = THREE.MathUtils.lerp(startFrame.config.spacing, endFrame.config.spacing, easedProgress);
-    // const cubeSize = THREE.MathUtils.lerp(startFrame.config.cubeSize, endFrame.config.cubeSize, easedProgress); // Removed from keyframes
+    const cubeSize = THREE.MathUtils.lerp(startFrame.config.cubeSize, endFrame.config.cubeSize, easedProgress);
     const startHour = THREE.MathUtils.lerp(startFrame.config.startHour, endFrame.config.startHour, easedProgress);
 
     setConfig({
       layout: startFrame.config.layout, // Discrete
       N: Math.round(N), // Integer
       spacing,
-      cubeSize: isHeartbeat ? currentCubeSize : 1.0, // Heartbeat overrides or default 1.0
+      cubeSize,
       startHour
     });
   });
@@ -800,7 +802,6 @@ export default function VisInteractive() {
   
   // Animation State
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isHeartbeat, setIsHeartbeat] = useState(false); // Heartbeat state
   const animationTime = useRef(0);
   const requestRef = useRef();
   const startTimeRef = useRef();
@@ -822,8 +823,7 @@ export default function VisInteractive() {
     N: { value: 24, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
     spacing: { value: 3, min: 0.1, max: 5.0, step: 0.1 },
     cubeSize: { value: 1.0, min: 0.1, max: 4.0, step: 0.1 },
-    startHour: { value: 0, options: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22], label: "Start Hour" },
-    "Heartbeat": { value: false, onChange: (v) => setIsHeartbeat(v) }, // Leva control
+    startHour: { value: 12, min: 0, max: 24, step: 0.1, label: "Start Hour" }, // Changed to slider for fluid animation
     
     "Test Animation": button(() => {
        startAnimation();
@@ -832,7 +832,6 @@ export default function VisInteractive() {
   
   const startAnimation = () => {
     setIsAnimating(true);
-    setIsHeartbeat(true); // Auto-start heartbeat
     animationTime.current = 0;
     startTimeRef.current = performance.now();
     requestRef.current = requestAnimationFrame(animate);
@@ -840,7 +839,6 @@ export default function VisInteractive() {
 
   const stopAnimation = () => {
     setIsAnimating(false);
-    setIsHeartbeat(false); // Auto-stop heartbeat
     cancelAnimationFrame(requestRef.current);
   };
 
@@ -897,7 +895,6 @@ export default function VisInteractive() {
 
           <AnimationController 
             isPlaying={isAnimating} 
-            isHeartbeat={isHeartbeat}
             time={animationTime} 
             setConfig={setConfig} 
           />
