@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, PerspectiveCamera, OrthographicCamera } from "@react-three/drei";
-import { useControls, Leva } from "leva";
+import { useControls, Leva, button, folder } from "leva";
 import * as THREE from "three";
 
 import { useSpring } from "@react-spring/three";
@@ -392,8 +392,78 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   );
 }
 
+import keyframes from "./keyframes.json";
+
+// --- Animation Controller ---
+// --- Animation Controller ---
+function AnimationController({ isPlaying, time, setConfig, setCamera }) {
+  const { camera } = useThree();
+  
+  // Reusable vectors to avoid GC
+  const vecA = useMemo(() => new THREE.Vector3(), []);
+  const vecB = useMemo(() => new THREE.Vector3(), []);
+  const vecC = useMemo(() => new THREE.Vector3(), []);
+  
+  useFrame(() => {
+    if (!isPlaying) return;
+
+    // Find current keyframe segment
+    const totalDuration = keyframes[keyframes.length - 1].time;
+    const currentTime = time.current;
+    
+    if (currentTime >= totalDuration) {
+      // Loop or stop? For now, let's clamp
+      return;
+    }
+
+    // Find indices
+    let startIdx = 0;
+    for (let i = 0; i < keyframes.length - 1; i++) {
+      if (currentTime >= keyframes[i].time && currentTime < keyframes[i+1].time) {
+        startIdx = i;
+        break;
+      }
+    }
+    const endIdx = startIdx + 1;
+    
+    const startFrame = keyframes[startIdx];
+    const endFrame = keyframes[endIdx];
+    
+    const duration = endFrame.time - startFrame.time;
+    const progress = (currentTime - startFrame.time) / duration;
+    const easedProgress = THREE.MathUtils.smoothstep(progress, 0, 1); // Simple ease-in-out
+
+    // Interpolate Camera
+    vecA.fromArray(startFrame.camera.position);
+    vecB.fromArray(endFrame.camera.position);
+    camera.position.lerpVectors(vecA, vecB, easedProgress);
+    
+    vecA.fromArray(startFrame.camera.target);
+    vecB.fromArray(endFrame.camera.target);
+    // Interpolate target then lookAt
+    vecC.lerpVectors(vecA, vecB, easedProgress);
+    camera.lookAt(vecC);
+
+    // Interpolate Config
+    const N = THREE.MathUtils.lerp(startFrame.config.N, endFrame.config.N, easedProgress);
+    const spacing = THREE.MathUtils.lerp(startFrame.config.spacing, endFrame.config.spacing, easedProgress);
+    const cubeSize = THREE.MathUtils.lerp(startFrame.config.cubeSize, endFrame.config.cubeSize, easedProgress);
+    const startHour = THREE.MathUtils.lerp(startFrame.config.startHour, endFrame.config.startHour, easedProgress);
+
+    setConfig({
+      layout: startFrame.config.layout, // Discrete
+      N: Math.round(N), // Integer
+      spacing,
+      cubeSize,
+      startHour
+    });
+  });
+
+  return null;
+}
+
 // --- Recorder Hook ---
-function useRecorder() {
+function useRecorder(onStart, onStop) {
   const [recording, setRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -401,6 +471,8 @@ function useRecorder() {
   const startRecording = (canvas) => {
     if (!canvas) return;
     
+    if (onStart) onStart();
+
     // 30 FPS for stability, 25 Mbps for high quality
     const stream = canvas.captureStream(30); 
     const mediaRecorder = new MediaRecorder(stream, {
@@ -425,6 +497,7 @@ function useRecorder() {
       a.download = `recording_interactive_${Date.now()}.webm`;
       a.click();
       URL.revokeObjectURL(url);
+      if (onStop) onStop();
     };
 
     mediaRecorder.start();
@@ -441,21 +514,132 @@ function useRecorder() {
   return { recording, startRecording, stopRecording };
 }
 
+
+
+// --- Camera Helper ---
+function CameraHelper({ controlsRef }) {
+  const { camera } = useThree();
+  const isUpdatingLeva = useRef(false);
+  const lastState = useRef({ position: [0,0,0], target: [0,0,0] });
+
+  const [, set] = useControls("Camera State", () => ({
+    position: { 
+      value: [20, 20, 20], 
+      step: 0.1,
+      onChange: (v) => {
+        if (!isUpdatingLeva.current) {
+          camera.position.set(...v);
+        }
+      }
+    },
+    target: { 
+      value: [0, 0, 0], 
+      step: 0.1,
+      onChange: (v) => {
+        if (!isUpdatingLeva.current && controlsRef.current) {
+          controlsRef.current.target.set(...v);
+          controlsRef.current.update();
+        }
+      }
+    },
+    "Log State": button(() => {
+        const state = {
+            time: 0, // Placeholder
+            camera: {
+                position: camera.position.toArray().map(v => Number(v.toFixed(2))),
+                target: controlsRef.current ? controlsRef.current.target.toArray().map(v => Number(v.toFixed(2))) : [0,0,0]
+            },
+            config: {
+                // We can't easily access the current config here without passing it in, 
+                // but the user mainly wants camera coords.
+            }
+        };
+        console.log("Keyframe Data:", JSON.stringify(state, null, 2));
+        alert("Camera state logged to console! Check the developer tools.");
+    })
+  }));
+
+  useFrame(() => {
+    if (controlsRef.current) {
+        const currentPos = camera.position.toArray();
+        const currentTarget = controlsRef.current.target.toArray();
+        
+        // Check if changed significantly to avoid loop/perf issues
+        const posChanged = currentPos.some((v, i) => Math.abs(v - lastState.current.position[i]) > 0.01);
+        const targetChanged = currentTarget.some((v, i) => Math.abs(v - lastState.current.target[i]) > 0.01);
+
+        if (posChanged || targetChanged) {
+            isUpdatingLeva.current = true;
+            set({
+                position: currentPos,
+                target: currentTarget
+            });
+            isUpdatingLeva.current = false;
+            
+            lastState.current.position = currentPos;
+            lastState.current.target = currentTarget;
+        }
+    }
+  });
+
+  return null;
+}
+
 export default function VisInteractive() {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [recordMode, setRecordMode] = useState(false);
   
+  // Animation State
+  const [isAnimating, setIsAnimating] = useState(false);
+  const animationTime = useRef(0);
+  const requestRef = useRef();
+  const startTimeRef = useRef();
+  
+  const controlsRef = useRef();
+
   // --- Leva Controls ---
-  const config = useControls({
+  // We use set to programmatically update Leva controls
+  const [config, setConfig] = useControls(() => ({
     layout: { options: ['Cube', 'Sphere', 'Cylinder', 'Helix', 'Scatter'], value: 'Cube' },
     N: { value: 24, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
     spacing: { value: 3, min: 0.1, max: 5.0, step: 0.1 },
     cubeSize: { value: 1.0, min: 0.1, max: 4.0, step: 0.1 },
     startHour: { value: 0, options: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22], label: "Start Hour" },
-  });
+    
+    "Test Animation": button(() => {
+       startAnimation();
+    })
+  }));
+  
+  const startAnimation = () => {
+    setIsAnimating(true);
+    animationTime.current = 0;
+    startTimeRef.current = performance.now();
+    requestRef.current = requestAnimationFrame(animate);
+  };
 
-  const { recording, startRecording, stopRecording } = useRecorder();
+  const stopAnimation = () => {
+    setIsAnimating(false);
+    cancelAnimationFrame(requestRef.current);
+  };
+
+  const animate = (time) => {
+    const elapsed = (time - startTimeRef.current) / 1000; // seconds
+    animationTime.current = elapsed;
+    
+    if (elapsed < 50) { // 50s duration
+      requestRef.current = requestAnimationFrame(animate);
+    } else {
+      stopAnimation();
+      if (recording) stopRecording(); // Auto stop recording if running
+    }
+  };
+
+  const { recording, startRecording, stopRecording } = useRecorder(
+    () => startAnimation(), // onStart
+    () => stopAnimation()   // onStop
+  );
 
   const activeItem = hovered || selected;
 
@@ -479,7 +663,7 @@ export default function VisInteractive() {
         zIndex: 0 // Ensure it's behind overlay
       }}>
         <Canvas 
-          dpr={2} // Force high DPI for better quality
+          dpr={recordMode ? 1 : 2} // Reduce DPR during recording to prevent stuttering
           gl={{ preserveDrawingBuffer: true }}
           onCreated={({ gl }) => {
             window._canvas = gl.domElement;
@@ -491,13 +675,21 @@ export default function VisInteractive() {
           
           <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
 
+          <AnimationController 
+            isPlaying={isAnimating} 
+            time={animationTime} 
+            setConfig={setConfig} 
+          />
+          
+          <CameraHelper controlsRef={controlsRef} />
+
           <AtlasCubeGrid 
             onHover={setHovered} 
             onClick={setSelected} 
             config={config}
           />
           
-          <OrbitControls enableDamping target={[0, 0, 0]} />
+          <OrbitControls ref={controlsRef} enabled={!isAnimating} enableDamping target={[0, 0, 0]} />
         </Canvas>
       </div>
 
@@ -546,7 +738,7 @@ export default function VisInteractive() {
                 color: recording ? 'white' : 'black'
               }}
             >
-              {recording ? "Stop Recording" : "Start Recording"}
+              {recording ? "Stop Recording" : "Start Recording (Auto Animation)"}
             </button>
           )}
         </div>
