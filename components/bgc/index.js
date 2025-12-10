@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html, DeviceOrientationControls } from "@react-three/drei";
+import { OrbitControls, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useSpring } from "@react-spring/three";
 import * as S from "./styles";
@@ -295,7 +295,7 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1, startHou
 // --- Camera Animator with DoF Control ---
 
 
-function AtlasCubeGrid({ layoutIndex, onLoad, onCubeClick }) {
+function AtlasCubeGrid({ layoutIndex, onLoad, onCubeClick, selectedInstanceId }) {
   const meshRef = useRef();
   const [atlas, setAtlas] = useState(null);
   const { gl } = useThree(); // Get gl to check max anisotropy
@@ -411,7 +411,7 @@ function AtlasCubeGrid({ layoutIndex, onLoad, onCubeClick }) {
     
     const needsRotation = (layout === 'Sphere' || layout === 'Cylinder' || layout === 'Helix' || layout === 'Conical');
     
-    const s = currentSize;
+    // const s = currentSize; // Moved inside loop for dynamic sizing
     
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
@@ -439,6 +439,10 @@ function AtlasCubeGrid({ layoutIndex, onLoad, onCubeClick }) {
       const z = uz * currentSpacing;
       
       const offset = i * 16;
+      
+      // Highlight selected element
+      const isSelected = (i === selectedInstanceId);
+      const s = isSelected ? currentSize * 3 : currentSize;
 
       if (!needsRotation) {
           array[offset] = s;
@@ -576,6 +580,124 @@ function CameraAnimator({ targetPosition, controlsRef }) {
 
 // ... (AtlasCubeGrid remains same) ...
 
+// --- Gyro Orbit Controls ---
+function GyroOrbitControls({ controlsRef, enabled }) {
+  const { camera } = useThree();
+  const [initialOrientation, setInitialOrientation] = useState(null);
+  const currentOrientation = useRef({ alpha: 0, beta: 0, gamma: 0 });
+  const smoothedOrientation = useRef({ alpha: 0, beta: 0 });
+  const isInteracting = useRef(false);
+  const baseSpherical = useRef(new THREE.Spherical());
+  
+  // Listen to OrbitControls interaction
+  useEffect(() => {
+      if (!controlsRef.current) return;
+      const controls = controlsRef.current;
+      
+      const onStart = () => {
+          isInteracting.current = true;
+          setInitialOrientation(null); // Reset gyro reference on touch
+      };
+      
+      const onEnd = () => {
+          isInteracting.current = false;
+          // Will re-capture initial orientation on next frame if gyro is enabled
+      };
+      
+      controls.addEventListener('start', onStart);
+      controls.addEventListener('end', onEnd);
+      
+      return () => {
+          controls.removeEventListener('start', onStart);
+          controls.removeEventListener('end', onEnd);
+      };
+  }, [controlsRef]);
+  
+  // Handle Device Orientation
+  useEffect(() => {
+      if (!enabled) {
+          setInitialOrientation(null);
+          return;
+      }
+      
+      const handleOrientation = (event) => {
+          if (event.alpha === null) return;
+          currentOrientation.current = {
+              alpha: event.alpha,
+              beta: event.beta,
+              gamma: event.gamma
+          };
+      };
+      
+      window.addEventListener('deviceorientation', handleOrientation);
+      return () => window.removeEventListener('deviceorientation', handleOrientation);
+  }, [enabled]);
+  
+  useFrame((state, delta) => {
+      if (!enabled || !controlsRef.current || isInteracting.current) return;
+      
+      const { alpha, beta } = currentOrientation.current;
+      
+      // Initialize if needed
+      if (!initialOrientation) {
+          setInitialOrientation({ alpha, beta });
+          smoothedOrientation.current = { alpha, beta };
+          
+          // Capture current camera spherical pos as base
+          const target = controlsRef.current.target;
+          baseSpherical.current.setFromVector3(camera.position.clone().sub(target));
+          return;
+      }
+      
+      // Smooth orientation
+      const lerpFactor = 5 * delta;
+      smoothedOrientation.current.alpha = THREE.MathUtils.lerp(smoothedOrientation.current.alpha, alpha, lerpFactor);
+      smoothedOrientation.current.beta = THREE.MathUtils.lerp(smoothedOrientation.current.beta, beta, lerpFactor);
+      
+      // Calculate deltas (in radians)
+      // Alpha: rotation around Z axis (compass). 0-360.
+      // Beta: rotation around X axis (tilt front/back). -180 to 180.
+      
+      const deltaAlpha = THREE.MathUtils.degToRad(smoothedOrientation.current.alpha - initialOrientation.alpha);
+      const deltaBeta = THREE.MathUtils.degToRad(smoothedOrientation.current.beta - initialOrientation.beta);
+      
+      // Apply to spherical coordinates
+      // OrbitControls uses:
+      // theta (azimuth): horizontal
+      // phi (polar): vertical
+      
+      // Mapping:
+      // Turn phone left/right (alpha) -> Orbit horizontally (theta)
+      // Tilt phone up/down (beta) -> Orbit vertically (phi)
+      
+      // Note: Direction might need inversion depending on preference
+      // Usually: Turn Left -> Camera moves Left (Orbit Left) -> Theta increases?
+      
+      const newTheta = baseSpherical.current.theta + deltaAlpha; 
+      const newPhi = baseSpherical.current.phi + deltaBeta;
+      
+      // Clamp phi to avoid flipping (OrbitControls default min/maxPolarAngle)
+      const clampedPhi = Math.max(0.01, Math.min(Math.PI - 0.01, newPhi));
+      
+      // Update camera position
+      const target = controlsRef.current.target;
+      const newPos = new THREE.Vector3().setFromSphericalCoords(
+          baseSpherical.current.radius,
+          clampedPhi,
+          newTheta
+      ).add(target);
+      
+      camera.position.copy(newPos);
+      camera.lookAt(target);
+      
+      // Important: Do NOT call controls.update() here as it might overwrite our manual position
+      // But we might need to sync OrbitControls state if we want seamless transition back to touch?
+      // OrbitControls reads from camera on 'start', so it should be fine.
+  });
+  
+  return null;
+}
+
 export default function BGCVisualization() {
   const [layoutIndex, setLayoutIndex] = useState(0);
   const [isKorean, setIsKorean] = useState(false);
@@ -584,6 +706,7 @@ export default function BGCVisualization() {
   const [useGyro, setUseGyro] = useState(false);
   const [focusTarget, setFocusTarget] = useState(null);
   const [selectedInfo, setSelectedInfo] = useState(null);
+  const [selectedInstanceId, setSelectedInstanceId] = useState(null);
   const controlsRef = useRef();
 
   // Detect browser language on mount
@@ -593,17 +716,35 @@ export default function BGCVisualization() {
       setIsKorean(true);
     }
   }, []);
+  
+  const resetCamera = () => {
+      if (controlsRef.current) {
+          controlsRef.current.target.set(0, 0, 0);
+          // Optional: Reset camera position to default if desired, but keeping current zoom might be better?
+          // User said "focus camera back to 0,0,0". Usually implies looking at origin.
+          // Let's also pull back a bit if we were zoomed in very close.
+          // Default pos is [0, 0, 100].
+          // Let's animate or set it? Setting is safer for "reset".
+          // controlsRef.current.object.position.set(0, 0, 100); 
+          // Actually, let's just reset target. The user might want to keep their rotation angle.
+          controlsRef.current.update();
+      }
+  };
 
   const handleNext = () => {
     setLayoutIndex((prev) => (prev + 1) % LAYOUT_PRESETS.length);
-    setFocusTarget(null); // Reset focus on layout change
+    setFocusTarget(null); 
     setSelectedInfo(null);
+    setSelectedInstanceId(null);
+    resetCamera();
   };
 
   const handlePrev = () => {
     setLayoutIndex((prev) => (prev - 1 + LAYOUT_PRESETS.length) % LAYOUT_PRESETS.length);
-    setFocusTarget(null); // Reset focus on layout change
+    setFocusTarget(null); 
     setSelectedInfo(null);
+    setSelectedInstanceId(null);
+    resetCamera();
   };
   
   const handleGyroToggle = () => {
@@ -624,17 +765,12 @@ export default function BGCVisualization() {
   
   const handleCubeClick = (position, instanceId) => {
       setFocusTarget(position);
+      setSelectedInstanceId(instanceId);
       
       // Calculate Year and Hour from instanceId
       const N = 24;
       const startHour = 12;
       const startHourIdx = Math.floor(startHour / 2);
-      
-      // instanceId = x * N * N + y * N + z
-      // But wait, the loop order in AtlasCubeGrid is x, y, z?
-      // Let's check indexArray generation:
-      // for x.. for y.. for z.. i++
-      // Yes.
       
       const z = instanceId % N;
       const y = Math.floor(instanceId / N) % N;
@@ -649,6 +785,7 @@ export default function BGCVisualization() {
   const handleBackgroundClick = () => {
       setFocusTarget(null);
       setSelectedInfo(null);
+      setSelectedInstanceId(null);
   };
 
   const currentLayout = LAYOUT_PRESETS[layoutIndex];
@@ -668,6 +805,7 @@ export default function BGCVisualization() {
             layoutIndex={layoutIndex} 
             onLoad={() => setLoading(false)} 
             onCubeClick={handleCubeClick}
+            selectedInstanceId={selectedInstanceId}
         />
         <OrbitControls 
             ref={controlsRef}
@@ -677,9 +815,9 @@ export default function BGCVisualization() {
             maxDistance={300}
             autoRotate={!useGyro} // Keep rotating even if focused, unless gyro is on
             autoRotateSpeed={0.5}
-            enabled={!useGyro} // Disable OrbitControls when Gyro is on to avoid conflict
+            // enabled={!useGyro} // REMOVED: Keep OrbitControls enabled for touch interaction
         />
-        {useGyro && <DeviceOrientationControls />}
+        <GyroOrbitControls controlsRef={controlsRef} enabled={useGyro} />
         <CameraAnimator targetPosition={focusTarget} controlsRef={controlsRef} />
         
       </Canvas>

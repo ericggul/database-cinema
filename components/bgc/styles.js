@@ -98,7 +98,7 @@ export const LayoutSelector = styled.div`
   gap: 10px;
   padding: 10px 20px;
   border-radius: 30px; /* More rounded */
-  width: 90%; /* Wider */
+  width: 99%; /* Wider */
   max-width: 500px; /* Max width constraint */
   
   /* Glass UI */
