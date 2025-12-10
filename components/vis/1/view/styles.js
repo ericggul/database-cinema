@@ -19,16 +19,18 @@ export const RecordContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 // Top: Angle (r, theta, phi)
 export const TopSection = styled.div`
   position: absolute;
-  top: 40px; /* Adjusted for visual balance */
+  top: 40px;
   width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 `;
 
 export const AngleText = styled.div`
@@ -45,43 +47,46 @@ export const MiddleSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px; /* Space between Korean and English */
+  gap: 10px;
+  width: 100%; /* Ensure full width for centering */
 `;
 
 export const NameKr = styled.div`
   width: 303px;
-  height: 67px;
+  /* Remove fixed height to allow wrapping if needed, though Korean usually fits */
+  min-height: 67px; 
   font-style: normal;
   font-weight: 500;
-  font-size: 60px;
-  line-height: 78px;
+  font-size: 55px;
+  line-height: 1.2; /* Adjusted for potential wrapping */
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: #F5F5F5;
-  white-space: nowrap;
+  white-space: nowrap; /* Korean usually short enough */
 `;
 
 export const NameEn = styled.div`
   width: 303px;
-  height: 67px;
+  min-height: 67px; /* Changed from fixed height */
   font-style: normal;
   font-weight: 500;
-  font-size: 60px;
-  line-height: 78px;
+  font-size: 55px;
+  line-height: 0.9; /* Tighter line height for multi-line */
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: #F5F5F5;
   text-transform: uppercase;
+  word-break: break-word; /* Allow breaking */
 `;
 
 // Bottom: Dimensions
 export const BottomSection = styled.div`
   position: absolute;
-  bottom: 40px; /* Adjusted for visual balance */
+  bottom: 40px;
   width: 100%;
   display: flex;
   justify-content: center;

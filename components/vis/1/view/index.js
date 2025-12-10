@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import keyframes from "../keyframes3.json";
 import * as THREE from "three";
+import html2canvas from "html2canvas";
 import {
   Container,
   RecordContainer,
@@ -15,25 +16,24 @@ import {
   Button,
 } from "./styles";
 
-// Layout name translations (English -> Korean)
+// Updated Korean Layout Names (Coordinate Systems)
 const LAYOUT_NAMES_KR = {
-  "Cube": "정육면체",
-  "Sphere": "구",
-  "Cylinder": "원기둥",
-  "Helix": "나선",
-  "Elliptic Cylinder": "타원 기둥",
-  "Parabolic Cylinder": "포물선 기둥",
-  "Conical": "원뿔",
-  "Oblate Spheroidal": "편구",
-  "Prolate Spheroidal": "장구",
-  "Ellipsoidal": "타원체",
-  "Paraboloidal": "포물면",
-  "Bispherical": "쌍구",
+  "Cube": "직교좌표계",
+  "Sphere": "구면좌표계",
+  "Cylinder": "원통좌표계",
+  "Helix": "나선좌표계",
+  "Elliptic Cylinder": "타원원통좌표계",
+  "Parabolic Cylinder": "포물선원통좌표계",
+  "Conical": "원뿔좌표계",
+  "Oblate Spheroidal": "편구면좌표계",
+  "Prolate Spheroidal": "장구면좌표계",
+  "Ellipsoidal": "타원면좌표계",
+  "Paraboloidal": "포물면좌표계",
+  "Bispherical": "쌍구면좌표계",
 };
 
 // --- Animation Hooks ---
 
-// Number Lerp Hook
 function useNumberLerp(targetValue, duration = 300, decimals = 0) {
   const [display, setDisplay] = useState(targetValue);
   const startValueRef = useRef(targetValue);
@@ -49,7 +49,6 @@ function useNumberLerp(targetValue, duration = 300, decimals = 0) {
       const elapsed = now - startTimeRef.current;
       const progress = Math.min(1, elapsed / duration);
       
-      // Ease out quart
       const ease = 1 - Math.pow(1 - progress, 4);
       
       const current = startValueRef.current + (targetValue - startValueRef.current) * ease;
@@ -69,8 +68,98 @@ function useNumberLerp(targetValue, duration = 300, decimals = 0) {
   return decimals === 0 ? Math.round(display) : display.toFixed(decimals);
 }
 
+// --- Recorder Hook ---
+function useRecorder(onStop) {
+  const [recording, setRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
+  const requestRef = useRef(null);
+
+  const startRecording = (element) => {
+    if (!element) {
+      console.error("No element to record");
+      return;
+    }
+    
+    setRecording(true);
+    chunksRef.current = [];
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 420;
+    canvas.height = 432;
+    const ctx = canvas.getContext('2d');
+
+    // Ensure we have a stream
+    const stream = canvas.captureStream(30); 
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType: 'video/webm;codecs=vp9',
+      videoBitsPerSecond: 5000000 
+    });
+
+    mediaRecorderRef.current = mediaRecorder;
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        chunksRef.current.push(e.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+      if (blob.size === 0) {
+        console.error("Recording failed: Empty blob");
+        alert("Recording failed: No data captured.");
+        if (onStop) onStop();
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `info_view_${Date.now()}.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
+      if (onStop) onStop();
+    };
+
+    mediaRecorder.start();
+
+    const captureFrame = async () => {
+      if (mediaRecorder.state === 'inactive') return;
+
+      try {
+        // html2canvas capture
+        const capturedCanvas = await html2canvas(element, {
+          backgroundColor: '#0D0D0D', // Explicit background
+          width: 420,
+          height: 432,
+          scale: 1,
+          logging: false,
+          useCORS: true,
+        });
+        
+        ctx.drawImage(capturedCanvas, 0, 0);
+        
+        requestRef.current = requestAnimationFrame(captureFrame);
+      } catch (err) {
+        console.error("Frame capture failed", err);
+      }
+    };
+
+    captureFrame();
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    }
+  };
+
+  return { recording, startRecording, stopRecording };
+}
+
 export default function InfoPanelView() {
-  const [recordMode, setRecordMode] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   
   // State for display
@@ -172,41 +261,52 @@ export default function InfoPanelView() {
     };
   }, []);
 
+  // --- Recorder ---
+  const { recording, startRecording, stopRecording } = useRecorder();
+
+  const handleToggleRecord = () => {
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording(containerRef.current);
+      // Auto-play animation from 0 when recording starts
+      startAnimation();
+    }
+  };
+
   // --- Animated Values ---
   const layoutKr = LAYOUT_NAMES_KR[displayData.layout] || displayData.layout;
   
   // Smooth N
   const smoothN = useNumberLerp(displayData.N, 500);
   
-  // Format Camera: (r, theta, phi)
-  // Use fixed decimals for clean look
-  const rVal = displayData.r.toFixed(0);
-  const thetaVal = displayData.theta.toFixed(0);
-  const phiVal = displayData.phi.toFixed(0);
+  // Format Camera: (r, theta, phi) - 1 Decimal Place
+  const rVal = displayData.r.toFixed(1);
+  const thetaVal = displayData.theta.toFixed(1);
+  const phiVal = displayData.phi.toFixed(1);
 
   return (
     <Container>
       <Controls>
-        <Button onClick={() => setRecordMode(!recordMode)}>
-          {recordMode ? "Exit Record" : "Record Mode"}
+        <Button onClick={handleToggleRecord} style={{ borderColor: recording ? 'red' : 'rgba(255,255,255,0.3)', color: recording ? 'red' : 'white' }}>
+          {recording ? "Stop Recording" : "Record View"}
         </Button>
-        {recordMode && (
-          <Button onClick={isAnimating ? stopAnimation : startAnimation}>
-            {isAnimating ? "Stop" : "Play"}
-          </Button>
-        )}
+        <Button onClick={isAnimating ? stopAnimation : startAnimation}>
+          {isAnimating ? "Stop Animation" : "Play Animation"}
+        </Button>
       </Controls>
 
       <RecordContainer
         ref={containerRef}
+        id="record-container" // ID for easier debugging if needed
         style={{
-          border: recordMode ? "1px solid #f00" : "none",
+          border: "none", // Removed red border to prevent it from showing in recording
         }}
       >
         {/* Top: Angle */}
         <TopSection>
           <AngleText>
-            ({rVal}, {thetaVal}, {phiVal})
+            ({rVal}, {thetaVal}°, {phiVal}°)
           </AngleText>
         </TopSection>
 

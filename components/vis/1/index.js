@@ -354,11 +354,11 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1, startHou
 const MAX_N = 24;
 const MAX_COUNT = MAX_N * MAX_N * MAX_N;
 
-function AtlasCubeGrid({ onHover, onClick, config }) {
+function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
   const meshRef = useRef();
   const [atlas, setAtlas] = useState(null);
   
-  const { N, spacing, cubeSize, layout } = config;
+  const { N, layout } = config; // spacing and cubeSize read from ref
   const startHour = 12; // Hardcoded to prevent floating-point flickering
   const count = N * N * N;
 
@@ -416,16 +416,10 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   }
 
   // Spring for transition (tension 60 = 2x slower than original 120)
-  const [{ t, smoothSize }, api] = useSpring(() => ({
+  const [{ t }, api] = useSpring(() => ({
     t: 1,
-    smoothSize: cubeSize,
     config: { mass: 1, tension: 110, friction: 20 },
   }));
-
-  // Update smoothSize when cubeSize changes
-  useEffect(() => {
-    api.start({ smoothSize: cubeSize });
-  }, [cubeSize, api]);
 
   // Capture start positions when layout changes
   useEffect(() => {
@@ -446,41 +440,110 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     }
 
     const progress = t.get();
-    const currentSize = smoothSize.get();
     
-    // Get current spacing from config (smooth interpolation handled by AnimationController)
-    const currentSpacing = spacing;
+    // Read from ref for smooth animation without React re-renders
+    const currentSize = animationConfigRef.current ? animationConfigRef.current.cubeSize : 1.0;
+    const currentSpacing = animationConfigRef.current ? animationConfigRef.current.spacing : 3.0;
+    
+    const instanceMatrix = meshRef.current.instanceMatrix;
+    const array = instanceMatrix.array;
+    
+    // Fast Path: Check if rotation is needed
+    // Only Sphere, Cylinder, Helix, Conical, etc might need rotation to lookAt center
+    // Actually, in the original code:
+    // if (layout === 'Sphere' || layout === 'Cylinder' || layout === 'Helix') lookAt(0,0,0)
+    // else rotation.set(0,0,0)
+    
+    const needsRotation = (layout === 'Sphere' || layout === 'Cylinder' || layout === 'Helix' || layout === 'Conical');
+    
+    // Pre-calculate scale matrix elements since scale is uniform
+    // Matrix4: 
+    // sx  0  0  0
+    // 0  sy  0  0
+    // 0  0  sz  0
+    // tx ty tz  1
+    
+    // If no rotation, the matrix is simple:
+    // s 0 0 0
+    // 0 s 0 0
+    // 0 0 s 0
+    // x y z 1
+    
+    const s = currentSize;
     
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
       const iy = i * 3 + 1;
       const iz = i * 3 + 2;
 
-      // Get unit-space position (interpolated for layout transitions)
-      const ux = THREE.MathUtils.lerp(startPositions.current[ix], targetPositions[ix], progress);
-      const uy = THREE.MathUtils.lerp(startPositions.current[iy], targetPositions[iy], progress);
-      const uz = THREE.MathUtils.lerp(startPositions.current[iz], targetPositions[iz], progress);
+      // Inline Lerp: start + (target - start) * progress
+      const startX = startPositions.current[ix];
+      const startY = startPositions.current[iy];
+      const startZ = startPositions.current[iz];
+      
+      const targetX = targetPositions[ix];
+      const targetY = targetPositions[iy];
+      const targetZ = targetPositions[iz];
+      
+      // Interpolated Unit Position
+      const ux = startX + (targetX - startX) * progress;
+      const uy = startY + (targetY - startY) * progress;
+      const uz = startZ + (targetZ - startZ) * progress;
 
       // Update current unit positions ref for next start point
       currentPositions.current[ix] = ux;
       currentPositions.current[iy] = uy;
       currentPositions.current[iz] = uz;
 
-      // Apply spacing as a multiplier (this makes spacing changes smooth without recalculating arrays)
-      tempObject.position.set(ux * currentSpacing, uy * currentSpacing, uz * currentSpacing);
-      tempObject.scale.set(currentSize, currentSize, currentSize);
+      // Final World Position
+      const x = ux * currentSpacing;
+      const y = uy * currentSpacing;
+      const z = uz * currentSpacing;
       
-      if (layout === 'Sphere' || layout === 'Cylinder' || layout === 'Helix') {
-         tempObject.lookAt(0, 0, 0);
-      } else {
-         tempObject.rotation.set(0, 0, 0);
-      }
+      const offset = i * 16;
 
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
+      if (!needsRotation) {
+          // FAST PATH: Direct Matrix Update (No Rotation)
+          // 0, 5, 10 are diagonals (scale)
+          // 12, 13, 14 are positions
+          // 15 is 1
+          // Others are 0
+          
+          array[offset] = s;
+          array[offset + 1] = 0;
+          array[offset + 2] = 0;
+          array[offset + 3] = 0;
+          
+          array[offset + 4] = 0;
+          array[offset + 5] = s;
+          array[offset + 6] = 0;
+          array[offset + 7] = 0;
+          
+          array[offset + 8] = 0;
+          array[offset + 9] = 0;
+          array[offset + 10] = s;
+          array[offset + 11] = 0;
+          
+          array[offset + 12] = x;
+          array[offset + 13] = y;
+          array[offset + 14] = z;
+          array[offset + 15] = 1;
+          
+      } else {
+          // SLOW PATH: Needs Rotation (LookAt 0,0,0)
+          tempObject.position.set(x, y, z);
+          tempObject.scale.set(s, s, s);
+          tempObject.lookAt(0, 0, 0);
+          tempObject.updateMatrix();
+          
+          // Copy to buffer
+          for (let k = 0; k < 16; k++) {
+              array[offset + k] = tempObject.matrix.elements[k];
+          }
+      }
     }
     
-    meshRef.current.instanceMatrix.needsUpdate = true;
+    instanceMatrix.needsUpdate = true;
   });
 
   // Initial Attribute Setup & Update
@@ -572,11 +635,14 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   );
 }
 
-import keyframes from "./keyframes3.json";
+import keyframes from "./keyframes4.json";
 
 // --- Animation Controller ---
-function AnimationController({ isPlaying, time, setConfig, setCamera }) {
+function AnimationController({ isPlaying, time, setConfig, setCamera, animationConfigRef }) {
   const { camera } = useThree();
+  const frameCount = useRef(0);
+  const lastLayout = useRef(null);
+  const lastN = useRef(null);
   
   // Reusable vectors to avoid GC
   const vecA = useMemo(() => new THREE.Vector3(), []);
@@ -666,13 +732,30 @@ function AnimationController({ isPlaying, time, setConfig, setCamera }) {
     // cubeSize now interpolates smoothly like spacing
     const cubeSize = THREE.MathUtils.lerp(startFrame.config.cubeSize, endFrame.config.cubeSize, easedProgress);
 
-    setConfig({
-      layout: startFrame.config.layout, // Discrete
-      N: N, // Discrete (no interpolation)
-      spacing,
-      cubeSize,
-      startHour: 12 // Hardcoded
-    });
+    // Update Ref directly for smooth 60fps animation
+    if (animationConfigRef.current) {
+        animationConfigRef.current.spacing = spacing;
+        animationConfigRef.current.cubeSize = cubeSize;
+    }
+
+    // Throttle UI updates (React State) to ~4fps to save CPU
+    // But update immediately if discrete values (Layout, N) change
+    const layoutChanged = startFrame.config.layout !== lastLayout.current;
+    const nChanged = N !== lastN.current;
+    
+    if (layoutChanged || nChanged || frameCount.current % 15 === 0) {
+        setConfig({
+          layout: startFrame.config.layout, // Discrete
+          N: N, // Discrete (no interpolation)
+          spacing,
+          cubeSize,
+          startHour: 12 // Hardcoded
+        });
+        lastLayout.current = startFrame.config.layout;
+        lastN.current = N;
+    }
+    
+    frameCount.current++;
   });
 
   return null;
@@ -692,7 +775,7 @@ function useRecorder(onStart, onStop) {
     // 30 FPS for stability, 5 Mbps for high quality (optimized from 25 Mbps)
     const stream = canvas.captureStream(30); 
     const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: 'video/webm', // Let browser choose best codec (usually VP8/VP9)
+      mimeType: 'video/webm;codecs=vp9', // Hardware acceleration preferred
       videoBitsPerSecond: 5000000 
     });
 
@@ -905,6 +988,9 @@ export default function VisInteractive() {
   const requestRef = useRef();
   const startTimeRef = useRef();
   
+  // Ref for high-frequency animation values (bypassing React state)
+  const animationConfigRef = useRef({ spacing: 3.0, cubeSize: 1.0 });
+  
   const controlsRef = useRef();
 
   // --- Leva Controls ---
@@ -1047,6 +1133,7 @@ export default function VisInteractive() {
             isPlaying={isAnimating} 
             time={animationTime} 
             setConfig={setConfig} 
+            animationConfigRef={animationConfigRef}
           />
           
           <CameraHelper controlsRef={controlsRef} onUpdate={setCameraState} jumpTarget={jumpTarget} />
@@ -1055,6 +1142,7 @@ export default function VisInteractive() {
             onHover={setHovered} 
             onClick={setSelected} 
             config={config}
+            animationConfigRef={animationConfigRef}
           />
           
           <OrbitControls ref={controlsRef} enabled={!isAnimating} enableDamping target={[0, 0, 0]} />
