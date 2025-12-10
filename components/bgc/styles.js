@@ -356,4 +356,43 @@ export const CancelButton = styled.button`
   }
 `;
 
+export const SelectionInfo = styled.div`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  pointer-events: none;
+  z-index: 20;
+  text-align: left;
+  animation: ${fadeIn} 0.5s ease-out;
+  
+  /* Glass UI - Modified to avoid screen blur issues */
+  background: rgba(20, 20, 20, 0.85); /* Darker, less transparent */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 15px 20px;
+  border-radius: 16px;
+`;
+
+export const SelectionTitle = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+`;
+
+export const SelectionDetail = styled.div`
+  font-size: 16px;
+  font-weight: 400;
+  color: white;
+  letter-spacing: 0.5px;
+  
+  span {
+    opacity: 0.7;
+    font-size: 14px;
+    margin-left: 6px;
+  }
+`;
+
 

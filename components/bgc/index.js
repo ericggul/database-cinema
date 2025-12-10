@@ -290,9 +290,15 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1, startHou
   return positions;
 };
 
-function AtlasCubeGrid({ layoutIndex, onLoad }) {
+// --- Camera Animator ---
+
+// --- Camera Animator with DoF Control ---
+
+
+function AtlasCubeGrid({ layoutIndex, onLoad, onCubeClick }) {
   const meshRef = useRef();
   const [atlas, setAtlas] = useState(null);
+  const { gl } = useThree(); // Get gl to check max anisotropy
   
   const currentPreset = LAYOUT_PRESETS[layoutIndex];
   const { name: layout, spacing: targetSpacing, cubeSize: targetCubeSize } = currentPreset;
@@ -306,6 +312,14 @@ function AtlasCubeGrid({ layoutIndex, onLoad }) {
     createAtlas(IMAGE_PATHS).then(data => {
       const texture = new THREE.CanvasTexture(data.canvas);
       texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false; // Atlas might not need mipmaps if we want sharp pixels, or true for smooth
+      // Actually for "blurry" complaint, maybe we want Nearest? 
+      // But these are photos. Linear is better.
+      // Let's enable anisotropy.
+      texture.anisotropy = gl.capabilities.getMaxAnisotropy();
+      
       setAtlas({ texture, cols: data.cols, rows: data.rows });
       
       // Enforce minimum loading time of 1.5s for visibility
@@ -317,7 +331,7 @@ function AtlasCubeGrid({ layoutIndex, onLoad }) {
       }, remaining);
       
     }).catch(err => console.error("Atlas generation failed", err));
-  }, []);
+  }, [gl]);
 
   // ... (rest of the component remains the same until return)
 
@@ -477,12 +491,24 @@ function AtlasCubeGrid({ layoutIndex, onLoad }) {
     }
   }, [indexArray, atlas]);
 
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (onCubeClick) {
+        const instanceId = e.instanceId;
+        const matrix = new THREE.Matrix4();
+        meshRef.current.getMatrixAt(instanceId, matrix);
+        const position = new THREE.Vector3().setFromMatrixPosition(matrix);
+        onCubeClick(position, instanceId);
+    }
+  };
+
   if (!atlas) return null;
 
   return (
     <instancedMesh
       ref={meshRef}
       args={[null, null, MAX_COUNT]}
+      onClick={handleClick}
     >
       <boxGeometry args={[1, 1, 1]} />
       <shaderMaterial
@@ -498,12 +524,67 @@ function AtlasCubeGrid({ layoutIndex, onLoad }) {
   );
 }
 
+// --- Camera Animator ---
+function CameraAnimator({ targetPosition, controlsRef }) {
+  const { camera } = useThree();
+  const vec = new THREE.Vector3();
+  const isAnimating = useRef(false);
+  
+  // Trigger animation when targetPosition changes
+  useEffect(() => {
+      if (targetPosition) {
+          isAnimating.current = true;
+      }
+  }, [targetPosition]);
+  
+  useFrame((state, delta) => {
+    if (!controlsRef.current || !targetPosition || !isAnimating.current) return;
+
+    // 1. Animate controls target to the exact cube position
+    const currentTarget = controlsRef.current.target;
+    const distToTarget = currentTarget.distanceTo(targetPosition);
+    
+    // Smooth lerp factor
+    const step = 5 * delta;
+
+    currentTarget.lerp(targetPosition, step);
+    
+    // 2. Animate camera position (Zoom in closer)
+    // Calculate direction from target to current camera position
+    vec.copy(camera.position).sub(currentTarget).normalize();
+    
+    // Desired distance (zoom level)
+    const zoomDist = 1.5; 
+    const desiredPos = targetPosition.clone().add(vec.multiplyScalar(zoomDist));
+    
+    camera.position.lerp(desiredPos, step);
+    
+    controlsRef.current.update();
+    
+    // Stop animating when close enough to allow free rotation
+    if (distToTarget < 0.01 && camera.position.distanceTo(desiredPos) < 0.01) {
+        isAnimating.current = false;
+        // Ensure final snap
+        controlsRef.current.target.copy(targetPosition);
+        camera.position.copy(desiredPos); // Snap camera to final desired position
+        controlsRef.current.update();
+    }
+  });
+  
+  return null;
+}
+
+// ... (AtlasCubeGrid remains same) ...
+
 export default function BGCVisualization() {
   const [layoutIndex, setLayoutIndex] = useState(0);
   const [isKorean, setIsKorean] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [useGyro, setUseGyro] = useState(false);
+  const [focusTarget, setFocusTarget] = useState(null);
+  const [selectedInfo, setSelectedInfo] = useState(null);
+  const controlsRef = useRef();
 
   // Detect browser language on mount
   useEffect(() => {
@@ -515,10 +596,14 @@ export default function BGCVisualization() {
 
   const handleNext = () => {
     setLayoutIndex((prev) => (prev + 1) % LAYOUT_PRESETS.length);
+    setFocusTarget(null); // Reset focus on layout change
+    setSelectedInfo(null);
   };
 
   const handlePrev = () => {
     setLayoutIndex((prev) => (prev - 1 + LAYOUT_PRESETS.length) % LAYOUT_PRESETS.length);
+    setFocusTarget(null); // Reset focus on layout change
+    setSelectedInfo(null);
   };
   
   const handleGyroToggle = () => {
@@ -536,6 +621,35 @@ export default function BGCVisualization() {
         setUseGyro(!useGyro);
     }
   };
+  
+  const handleCubeClick = (position, instanceId) => {
+      setFocusTarget(position);
+      
+      // Calculate Year and Hour from instanceId
+      const N = 24;
+      const startHour = 12;
+      const startHourIdx = Math.floor(startHour / 2);
+      
+      // instanceId = x * N * N + y * N + z
+      // But wait, the loop order in AtlasCubeGrid is x, y, z?
+      // Let's check indexArray generation:
+      // for x.. for y.. for z.. i++
+      // Yes.
+      
+      const z = instanceId % N;
+      const y = Math.floor(instanceId / N) % N;
+      const x = Math.floor(instanceId / (N * N));
+      
+      const year = YEARS[x % 12];
+      const hour = HOURS[(z + startHourIdx) % 12];
+      
+      setSelectedInfo({ year, hour });
+  };
+  
+  const handleBackgroundClick = () => {
+      setFocusTarget(null);
+      setSelectedInfo(null);
+  };
 
   const currentLayout = LAYOUT_PRESETS[layoutIndex];
   const displayName = isKorean ? (LAYOUT_NAMES_KR[currentLayout.name] || currentLayout.name) : currentLayout.name;
@@ -545,33 +659,48 @@ export default function BGCVisualization() {
     <S.Container>
       <S.LoadingOverlay $visible={loading} />
       
-      <Canvas camera={{ position: [0, 0, 100], fov: 60 }}>
+      <Canvas 
+        camera={{ position: [0, 0, 100], fov: 60 }}
+        onPointerMissed={handleBackgroundClick}
+      >
         <color attach="background" args={["#000"]} />
-        <AtlasCubeGrid layoutIndex={layoutIndex} onLoad={() => setLoading(false)} />
+        <AtlasCubeGrid 
+            layoutIndex={layoutIndex} 
+            onLoad={() => setLoading(false)} 
+            onCubeClick={handleCubeClick}
+        />
         <OrbitControls 
+            ref={controlsRef}
             enablePan={false} 
             enableZoom={true} 
             minDistance={10} 
             maxDistance={300}
-            autoRotate={!useGyro}
+            autoRotate={!useGyro && !focusTarget} // Stop auto-rotate when focused
             autoRotateSpeed={0.5}
         />
-        {/* We can add DeviceOrientationControls here if needed, but for now we'll just toggle autoRotate or similar 
-            since standard OrbitControls doesn't mix well with DeviceOrientationControls without switching.
-            However, user asked for "Shake" button. Let's assume it toggles a "Gyro" mode. 
-            If useGyro is true, we could use DeviceOrientationControls. 
-            But standard drei DeviceOrientationControls replaces camera control. 
-            Let's keep it simple: "Shake" button toggles autoRotate for now, or we can try to implement actual shake.
-            User said "Phone Shake" button. 
-            Let's implement a visual toggle for now, as full gyro implementation might conflict with OrbitControls.
-            Actually, let's try to use it if requested.
-        */}
+        <CameraAnimator targetPosition={focusTarget} controlsRef={controlsRef} />
+        
       </Canvas>
 
       <S.UIOverlay>
         <S.LanguageToggle onClick={() => setIsKorean(!isKorean)}>
           {isKorean ? "EN" : "KR"}
         </S.LanguageToggle>
+        
+        {selectedInfo && (
+            <S.SelectionInfo>
+                <S.SelectionTitle>
+                    {isKorean ? "선택된 기록" : "Selected Record"}
+                </S.SelectionTitle>
+                <S.SelectionDetail>
+                    {selectedInfo.year}
+                    <span>{isKorean ? "불광천" : "Bulgwangcheon"}</span>
+                </S.SelectionDetail>
+                <S.SelectionDetail>
+                    {selectedInfo.hour}
+                </S.SelectionDetail>
+            </S.SelectionInfo>
+        )}
 
         <S.BottomControls>
             <S.LayoutSelector>
