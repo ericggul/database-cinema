@@ -590,19 +590,9 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, isHeartbea
     const easedProgress = THREE.MathUtils.smoothstep(progress, 0, 1); // Simple ease-in-out
 
     // Interpolate Camera
-    // Spherical interpolation for smooth orbit
-    const startSph = startFrame.camera.spherical;
-    const endSph = endFrame.camera.spherical;
-    
-    const r = THREE.MathUtils.lerp(startSph.radius, endSph.radius, easedProgress);
-    const theta = THREE.MathUtils.lerp(startSph.theta, endSph.theta, easedProgress);
-    const phi = THREE.MathUtils.lerp(startSph.phi, endSph.phi, easedProgress);
-    
-    // Convert to Cartesian
-    // THREE.Spherical: radius, phi (polar), theta (equator)
-    const sph = new THREE.Spherical(r, phi, theta);
-    const pos = new THREE.Vector3().setFromSpherical(sph);
-    camera.position.copy(pos);
+    vecA.fromArray(startFrame.camera.position);
+    vecB.fromArray(endFrame.camera.position);
+    camera.position.lerpVectors(vecA, vecB, easedProgress);
     
     vecA.fromArray(startFrame.camera.target);
     vecB.fromArray(endFrame.camera.target);
@@ -685,45 +675,15 @@ function useRecorder(onStart, onStop) {
 function CameraHelper({ controlsRef, onUpdate }) {
   const { camera } = useThree();
   const isUpdatingLeva = useRef(false);
-  const lastState = useRef({ radius: 0, theta: 0, phi: 0, target: [0,0,0] });
+  const lastState = useRef({ position: [0,0,0], target: [0,0,0] });
 
   const [, set] = useControls("Camera State", () => ({
-    radius: { 
-      value: 60, 
-      min: 10, max: 200, step: 1,
+    position: { 
+      value: [20, 20, 20], 
+      step: 0.1,
       onChange: (v) => {
-        if (!isUpdatingLeva.current && controlsRef.current) {
-           // Get current angles
-           const sph = new THREE.Spherical().setFromVector3(camera.position);
-           sph.radius = v;
-           camera.position.setFromSpherical(sph);
-           controlsRef.current.update();
-        }
-      }
-    },
-    theta: { 
-      value: 0, 
-      min: 0, max: Math.PI * 2, step: 0.01,
-      label: "Theta (Horiz)",
-      onChange: (v) => {
-        if (!isUpdatingLeva.current && controlsRef.current) {
-           const sph = new THREE.Spherical().setFromVector3(camera.position);
-           sph.theta = v;
-           camera.position.setFromSpherical(sph);
-           controlsRef.current.update();
-        }
-      }
-    },
-    phi: { 
-      value: 1.5, 
-      min: 0.01, max: Math.PI - 0.01, step: 0.01,
-      label: "Phi (Vert)",
-      onChange: (v) => {
-        if (!isUpdatingLeva.current && controlsRef.current) {
-           const sph = new THREE.Spherical().setFromVector3(camera.position);
-           sph.phi = v;
-           camera.position.setFromSpherical(sph);
-           controlsRef.current.update();
+        if (!isUpdatingLeva.current) {
+          camera.position.set(...v);
         }
       }
     },
@@ -738,53 +698,43 @@ function CameraHelper({ controlsRef, onUpdate }) {
       }
     },
     "Log State": button(() => {
-        const sph = new THREE.Spherical().setFromVector3(camera.position);
         const state = {
-            time: 0, 
+            time: 0, // Placeholder
             camera: {
-                spherical: {
-                    radius: Number(sph.radius.toFixed(2)),
-                    theta: Number(sph.theta.toFixed(3)),
-                    phi: Number(sph.phi.toFixed(3))
-                },
+                position: camera.position.toArray().map(v => Number(v.toFixed(2))),
                 target: controlsRef.current ? controlsRef.current.target.toArray().map(v => Number(v.toFixed(2))) : [0,0,0]
             },
-            config: {}
+            config: {
+                // We can't easily access the current config here without passing it in, 
+                // but the user mainly wants camera coords.
+            }
         };
         console.log("Keyframe Data:", JSON.stringify(state, null, 2));
-        alert("Camera state logged to console!");
+        alert("Camera state logged to console! Check the developer tools.");
     })
   }));
 
   useFrame(() => {
     if (controlsRef.current) {
-        const sph = new THREE.Spherical().setFromVector3(camera.position);
+        const currentPos = camera.position.toArray();
         const currentTarget = controlsRef.current.target.toArray();
         
-        // Check change
-        const rDiff = Math.abs(sph.radius - lastState.current.radius);
-        const tDiff = Math.abs(sph.theta - lastState.current.theta);
-        const pDiff = Math.abs(sph.phi - lastState.current.phi);
+        // Check if changed significantly to avoid loop/perf issues
+        const posChanged = currentPos.some((v, i) => Math.abs(v - lastState.current.position[i]) > 0.01);
         const targetChanged = currentTarget.some((v, i) => Math.abs(v - lastState.current.target[i]) > 0.01);
 
-        if (rDiff > 0.1 || tDiff > 0.01 || pDiff > 0.01 || targetChanged) {
+        if (posChanged || targetChanged) {
             isUpdatingLeva.current = true;
             set({
-                radius: sph.radius,
-                theta: sph.theta,
-                phi: sph.phi,
+                position: currentPos,
                 target: currentTarget
             });
             isUpdatingLeva.current = false;
             
-            lastState.current = { radius: sph.radius, theta: sph.theta, phi: sph.phi, target: currentTarget };
+            lastState.current.position = currentPos;
+            lastState.current.target = currentTarget;
             
-            if (onUpdate) onUpdate({ 
-                radius: sph.radius, 
-                theta: sph.theta, 
-                phi: sph.phi, 
-                target: currentTarget 
-            });
+            if (onUpdate) onUpdate({ position: currentPos, target: currentTarget });
         }
     }
   });
@@ -923,9 +873,7 @@ export default function VisInteractive() {
           <br/>
           {cameraState ? (
             <>
-              <strong>R:</strong> {cameraState.radius.toFixed(1)}<br/>
-              <strong>Theta:</strong> {cameraState.theta.toFixed(2)}<br/>
-              <strong>Phi:</strong> {cameraState.phi.toFixed(2)}<br/>
+              <strong>Camera Pos:</strong> [{cameraState.position.map(v => v.toFixed(2)).join(', ')}]<br/>
               <strong>Target:</strong> [{cameraState.target.map(v => v.toFixed(2)).join(', ')}]
             </>
           ) : (
