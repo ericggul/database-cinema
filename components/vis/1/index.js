@@ -419,7 +419,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   const [{ t, smoothSize }, api] = useSpring(() => ({
     t: 1,
     smoothSize: cubeSize,
-    config: { mass: 1, tension: 90, friction: 20 },
+    config: { mass: 1, tension: 110, friction: 20 },
   }));
 
   // Update smoothSize when cubeSize changes
@@ -609,7 +609,24 @@ function AnimationController({ isPlaying, time, setConfig, setCamera }) {
     const endFrame = keyframes[endIdx];
     
     const duration = endFrame.time - startFrame.time;
-    const progress = (currentTime - startFrame.time) / (endFrame.time - startFrame.time);
+    const elapsed = currentTime - startFrame.time;
+    
+    // Delay: only apply after t >= 10s (early keyframes need fast transitions)
+    let progress;
+    if (currentTime >= 14) {
+      const DELAY = 1.0; // seconds to hold at start
+      const animDuration = Math.max(0.1, duration - DELAY);
+      
+      if (elapsed < DELAY) {
+        progress = 0; // Stay at start position
+      } else {
+        progress = Math.min(1, (elapsed - DELAY) / animDuration);
+      }
+    } else {
+      // Before t=10s: continuous animation (no delay)
+      progress = elapsed / duration;
+    }
+    
     const easedProgress = THREE.MathUtils.smoothstep(progress, 0, 1); // Simple ease-in-out
 
     // Snappy CubeSize Transition (0.5s duration)
@@ -979,7 +996,7 @@ export default function VisInteractive() {
     const elapsed = (time - startTimeRef.current) / 1000; // seconds
     animationTime.current = elapsed;
     
-    if (elapsed < 58) { // 58s duration (matches last keyframe)
+    if (elapsed < 60) { // 58s duration (matches last keyframe)
       requestRef.current = requestAnimationFrame(animate);
     } else {
       stopAnimation();

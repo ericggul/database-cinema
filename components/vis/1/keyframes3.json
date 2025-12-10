@@ -32,28 +32,12 @@
         }
     },
     {
-        "time": 4,
+        "time": 2,
         "camera": {
             "spherical": {
                 "radius": 3,
-                "theta": 10,
-                "phi": 85
-            }
-        },
-        "config": {
-            "layout": "Cube",
-            "N": 2,
-            "spacing": 2.0,
-            "cubeSize": 1.0
-        }
-    },
-    {
-        "time": 6,
-        "camera": {
-            "spherical": {
-                "radius": 5,
-                "theta": 20,
-                "phi": 80
+                "theta": 0,
+                "phi": 90
             }
         },
         "config": {
@@ -64,12 +48,12 @@
         }
     },
     {
-        "time": 7,
+        "time": 3,
         "camera": {
             "spherical": {
                 "radius": 10,
-                "theta": 30,
-                "phi": 75
+                "theta": 0,
+                "phi": 90
             }
         },
         "config": {
@@ -80,12 +64,12 @@
         }
     },
     {
-        "time": 8,
+        "time": 4,
         "camera": {
             "spherical": {
                 "radius": 15,
-                "theta": 40,
-                "phi": 72
+                "theta": 0,
+                "phi": 90
             }
         },
         "config": {
@@ -96,12 +80,12 @@
         }
     },
     {
-        "time": 9,
+        "time": 5,
         "camera": {
             "spherical": {
                 "radius": 20,
-                "theta": 45,
-                "phi": 70
+                "theta": 0,
+                "phi": 90
             }
         },
         "config": {
@@ -112,10 +96,42 @@
         }
     },
     {
-        "time": 10,
+        "time": 6,
+        "camera": {
+            "spherical": {
+                "radius": 30,
+                "theta": 0,
+                "phi": 90
+            }
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.0,
+            "cubeSize": 1.0
+        }
+    },
+    {
+        "time": 9,
         "camera": {
             "spherical": {
                 "radius": 50,
+                "theta": 0,
+                "phi": 90
+            }
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.0,
+            "cubeSize": 1.0
+        }
+    },
+    {
+        "time": 11,
+        "camera": {
+            "spherical": {
+                "radius": 15,
                 "theta": 45,
                 "phi": 69
             }
@@ -131,7 +147,7 @@
         "time": 14,
         "camera": {
             "spherical": {
-                "radius": 80,
+                "radius": 50,
                 "theta": 90,
                 "phi": 60
             }
@@ -179,7 +195,7 @@
         "time": 26,
         "camera": {
             "spherical": {
-                "radius": 60,
+                "radius": 75,
                 "theta": 225,
                 "phi": 70
             }
@@ -227,7 +243,7 @@
         "time": 38,
         "camera": {
             "spherical": {
-                "radius": 70,
+                "radius": 115,
                 "theta": 360,
                 "phi": 50
             }
@@ -276,8 +292,8 @@
         "camera": {
             "spherical": {
                 "radius": 15,
-                "theta": 495,
-                "phi": 69
+                "theta": 540,
+                "phi": 85
             }
         },
         "config": {
@@ -293,7 +309,7 @@
             "spherical": {
                 "radius": 50,
                 "theta": 540,
-                "phi": 69
+                "phi": 90
             }
         },
         "config": {
@@ -304,12 +320,12 @@
         }
     },
     {
-        "time": 58,
+        "time": 60,
         "camera": {
             "spherical": {
-                "radius": 400,
+                "radius": 1000,
                 "theta": 540,
-                "phi": 69
+                "phi": 90
             }
         },
         "config": {
