@@ -575,63 +575,91 @@ export default function BGCVisualization() {
 
         <S.BottomControls>
             <S.LayoutSelector>
+                <S.InfoIcon onClick={() => setShowInfo(true)}>
+                    i
+                </S.InfoIcon>
+                
                 <S.ArrowButton onClick={handlePrev}>←</S.ArrowButton>
+                
                 <S.LayoutInfo>
                     <S.LayoutName>{displayName}</S.LayoutName>
                     {subName && <S.LayoutSub>{subName}</S.LayoutSub>}
                 </S.LayoutInfo>
+                
                 <S.ArrowButton onClick={handleNext}>→</S.ArrowButton>
+                
+                <S.ShakeButton onClick={handleGyroToggle} style={{ opacity: useGyro ? 1 : 0.5 }}>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14zm-4.2-5.78v1.75l3.2-1.79c.05-.03.09-.07.12-.12.03-.04.05-.09.05-.15 0-.1-.05-.2-.13-.26l-3.24-2.16v1.75c-3.09-.46-4.63-2.79-4.63-2.79 1.1 3.72 4.63 3.77 4.63 3.77z"/>
+                    </svg>
+                </S.ShakeButton>
             </S.LayoutSelector>
         </S.BottomControls>
-
-        <S.Footer>
-            <S.InfoIcon onClick={() => setShowInfo(true)}>
-                i
-            </S.InfoIcon>
-        </S.Footer>
-        
-        <S.RightControls>
-            <S.ShakeButton onClick={handleGyroToggle} style={{ opacity: useGyro ? 1 : 0.5 }}>
-                {/* Simple Phone Shake Icon */}
-                <svg viewBox="0 0 24 24">
-                    <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14zm-4.2-5.78v1.75l3.2-1.79c.05-.03.09-.07.12-.12.03-.04.05-.09.05-.15 0-.1-.05-.2-.13-.26l-3.24-2.16v1.75c-3.09-.46-4.63-2.79-4.63-2.79 1.1 3.72 4.63 3.77 4.63 3.77z"/>
-                </svg>
-            </S.ShakeButton>
-        </S.RightControls>
         
         {showInfo && (
             <S.InfoModalOverlay onClick={() => setShowInfo(false)}>
                 <S.InfoModal onClick={e => e.stopPropagation()}>
                     <S.CloseButton onClick={() => setShowInfo(false)}>×</S.CloseButton>
+                    <S.ModalLabel>Artwork Name</S.ModalLabel>
                     <S.ModalTitle>
                         GTNSODCSICSHECPCCOSPSEPABTDANGODCITAOGAIGV1GIOBSOEDSF1T2AF0HT2HCA1B1PPWFTCIOTDIAWPATGAIWFTBOTDCSENOANABAANATCMIAITAONAAPEONMAALMT(GenerativeTopologicalNavigationStudyOfDifferentCoordinateSystemsIncludingCubeSphereCylinderHelixEllipticCylindricalParabolicCylindricalConicalOblateSpheroidalProlateSpheroidalEllipsoidalParaboloidalAndBisphericalToDefineANewGrammarOfDatabaseCinemaInTheAgeOfGenerativeAIGeneratedVia144GenerativeImagesOfBulgwangcheonStreamOfEunpyeongDistrictSeoulFrom1915To2025AndFrom00HrTo22HrCreatingA12By12ParametricPlaneWhichFormsTheConceptualInterpretationOfTemporalDimensionInAssociationWithParametricApproachToGenerativeAIWhichFormsTheBasisOfTheseDifferentCoordinateSystemsEstablishingNotOnlyANewAestheticButAlsoANewApproachToCreatingMovingImageAndInterpretingTheActOfNavigationAsAProvocativeExpressionOfNewMediaArtAsLevManovichTheorised)
                     </S.ModalTitle>
                     <S.ModalContent>
-                        <h3>Generative Topological Navigation</h3>
-                        <p>
-                            : A Study of Coordinate Systems and Database Cinema
-                        </p>
-                        
-                        <p>
-                            This project presents a <strong>Generative Topological Navigation Study</strong> utilizing a comprehensive array of distinct coordinate systems—specifically Cube, Sphere, Cylinder, Helix, Elliptic Cylindrical, Parabolic Cylindrical, Conical, Oblate Spheroidal, Prolate Spheroidal, Ellipsoidal, Paraboloidal, and Bispherical frameworks.
-                        </p>
-                        <p>
-                            The primary objective is to define a <strong>new grammar of "Database Cinema"</strong> in the age of Generative AI. The visual foundation of this work consists of <strong>144 generative images</strong> depicting the <strong>Bulgwangcheon Stream</strong> in the Eunpyeong District of Seoul. These images are structured within a <strong>12x12 parametric plane</strong>, mapping a historical timeline from <strong>1915 to 2025</strong> (x-axis) and a daily cycle from <strong>00:00 to 22:00</strong> (y-axis).
-                        </p>
-                        <p>
-                            This grid forms a conceptual interpretation of the temporal dimension, intrinsically linking the parametric nature of generative AI to the mathematical basis of the diverse coordinate systems employed. By navigating this latent space, the project establishes not only a new aesthetic but also a novel approach to creating moving images. Ultimately, it reinterprets the act of <strong>navigation as a provocative expression of New Media Art</strong>, expanding upon the theoretical frameworks originally proposed by <strong>Lev Manovich</strong>.
-                        </p>
-                        
-                        <h3>국문 요약</h3>
-                        <p>
-                            본 프로젝트는 큐브, 구, 원통, 나선, 타원 원통, 포물선 원통, 원뿔, 편구, 장구, 타원체, 포물면, 그리고 이구 좌표계(Bispherical) 등 다양한 좌표계를 활용한 <strong>생성형 위상학적 내비게이션(Generative Topological Navigation)</strong> 연구입니다.
-                        </p>
-                        <p>
-                            이 작업은 생성형 AI 시대에 <strong>"데이터베이스 시네마(Database Cinema)"의 새로운 문법</strong>을 정의하는 것을 목표로 합니다. 작품의 시각적 기반은 서울 은평구 <strong>불광천</strong>의 모습을 담은 <strong>144장의 생성형 이미지</strong>로 구성되며, 이는 <strong>1915년부터 2025년</strong>까지의 연도와 <strong>00시부터 22시</strong>까지의 시간을 축으로 하는 <strong>12x12 파라메트릭 평면(Parametric Plane)</strong>을 형성합니다.
-                        </p>
-                        <p>
-                            이러한 구조는 생성형 AI의 파라메트릭 접근 방식과 다양한 좌표계의 수학적 기초를 결합하여 시간적 차원을 개념적으로 해석합니다. 결과적으로 이 작품은 새로운 미학을 정립할 뿐만 아니라 무빙 이미지를 제작하는 새로운 접근 방식을 제시하며, <strong>레프 마노비치(Lev Manovich)</strong>가 이론화한 바와 같이 <strong>'내비게이션(탐색) 행위'</strong> 자체를 뉴미디어 아트의 도발적인 표현 양식으로 해석합니다.
-                        </p>
+                        {isKorean ? (
+                            <>
+                                <h3>국문 요약</h3>
+                                <p>
+                                    본 프로젝트는 큐브, 구, 원통, 나선, 타원 원통, 포물선 원통, 원뿔, 편구, 장구, 타원체, 포물면, 그리고 이구 좌표계(Bispherical) 등 다양한 좌표계를 활용한 <strong>생성형 위상학적 내비게이션(Generative Topological Navigation)</strong> 연구입니다.
+                                </p>
+                                <p>
+                                    이 작업은 생성형 AI 시대에 <strong>"데이터베이스 시네마(Database Cinema)"의 새로운 문법</strong>을 정의하는 것을 목표로 합니다. 작품의 시각적 기반은 서울 은평구 <strong>불광천</strong>의 모습을 담은 <strong>144장의 생성형 이미지</strong>로 구성되며, 이는 <strong>1915년부터 2025년</strong>까지의 연도와 <strong>00시부터 22시</strong>까지의 시간을 축으로 하는 <strong>12x12 파라메트릭 평면(Parametric Plane)</strong>을 형성합니다.
+                                </p>
+                                <p>
+                                    이러한 구조는 생성형 AI의 파라메트릭 접근 방식과 다양한 좌표계의 수학적 기초를 결합하여 시간적 차원을 개념적으로 해석합니다. 결과적으로 이 작품은 새로운 미학을 정립할 뿐만 아니라 무빙 이미지를 제작하는 새로운 접근 방식을 제시하며, <strong>레프 마노비치(Lev Manovich)</strong>가 이론화한 바와 같이 <strong>'내비게이션(탐색) 행위'</strong> 자체를 뉴미디어 아트의 도발적인 표현 양식으로 해석합니다.
+                                </p>
+
+                                <h3>Generative Topological Navigation</h3>
+                                <p>
+                                    : A Study of Coordinate Systems and Database Cinema
+                                </p>
+                                <p>
+                                    This project presents a <strong>Generative Topological Navigation Study</strong> utilizing a comprehensive array of distinct coordinate systems—specifically Cube, Sphere, Cylinder, Helix, Elliptic Cylindrical, Parabolic Cylindrical, Conical, Oblate Spheroidal, Prolate Spheroidal, Ellipsoidal, Paraboloidal, and Bispherical frameworks.
+                                </p>
+                                <p>
+                                    The primary objective is to define a <strong>new grammar of "Database Cinema"</strong> in the age of Generative AI. The visual foundation of this work consists of <strong>144 generative images</strong> depicting the <strong>Bulgwangcheon Stream</strong> in the Eunpyeong District of Seoul. These images are structured within a <strong>12x12 parametric plane</strong>, mapping a historical timeline from <strong>1915 to 2025</strong> (x-axis) and a daily cycle from <strong>00:00 to 22:00</strong> (y-axis).
+                                </p>
+                                <p>
+                                    This grid forms a conceptual interpretation of the temporal dimension, intrinsically linking the parametric nature of generative AI to the mathematical basis of the diverse coordinate systems employed. By navigating this latent space, the project establishes not only a new aesthetic but also a novel approach to creating moving images. Ultimately, it reinterprets the act of <strong>navigation as a provocative expression of New Media Art</strong>, expanding upon the theoretical frameworks originally proposed by <strong>Lev Manovich</strong>.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <h3>Generative Topological Navigation</h3>
+                                <p>
+                                    : A Study of Coordinate Systems and Database Cinema
+                                </p>
+                                <p>
+                                    This project presents a <strong>Generative Topological Navigation Study</strong> utilizing a comprehensive array of distinct coordinate systems—specifically Cube, Sphere, Cylinder, Helix, Elliptic Cylindrical, Parabolic Cylindrical, Conical, Oblate Spheroidal, Prolate Spheroidal, Ellipsoidal, Paraboloidal, and Bispherical frameworks.
+                                </p>
+                                <p>
+                                    The primary objective is to define a <strong>new grammar of "Database Cinema"</strong> in the age of Generative AI. The visual foundation of this work consists of <strong>144 generative images</strong> depicting the <strong>Bulgwangcheon Stream</strong> in the Eunpyeong District of Seoul. These images are structured within a <strong>12x12 parametric plane</strong>, mapping a historical timeline from <strong>1915 to 2025</strong> (x-axis) and a daily cycle from <strong>00:00 to 22:00</strong> (y-axis).
+                                </p>
+                                <p>
+                                    This grid forms a conceptual interpretation of the temporal dimension, intrinsically linking the parametric nature of generative AI to the mathematical basis of the diverse coordinate systems employed. By navigating this latent space, the project establishes not only a new aesthetic but also a novel approach to creating moving images. Ultimately, it reinterprets the act of <strong>navigation as a provocative expression of New Media Art</strong>, expanding upon the theoretical frameworks originally proposed by <strong>Lev Manovich</strong>.
+                                </p>
+
+                                <h3>국문 요약</h3>
+                                <p>
+                                    본 프로젝트는 큐브, 구, 원통, 나선, 타원 원통, 포물선 원통, 원뿔, 편구, 장구, 타원체, 포물면, 그리고 이구 좌표계(Bispherical) 등 다양한 좌표계를 활용한 <strong>생성형 위상학적 내비게이션(Generative Topological Navigation)</strong> 연구입니다.
+                                </p>
+                                <p>
+                                    이 작업은 생성형 AI 시대에 <strong>"데이터베이스 시네마(Database Cinema)"의 새로운 문법</strong>을 정의하는 것을 목표로 합니다. 작품의 시각적 기반은 서울 은평구 <strong>불광천</strong>의 모습을 담은 <strong>144장의 생성형 이미지</strong>로 구성되며, 이는 <strong>1915년부터 2025년</strong>까지의 연도와 <strong>00시부터 22시</strong>까지의 시간을 축으로 하는 <strong>12x12 파라메트릭 평면(Parametric Plane)</strong>을 형성합니다.
+                                </p>
+                                <p>
+                                    이러한 구조는 생성형 AI의 파라메트릭 접근 방식과 다양한 좌표계의 수학적 기초를 결합하여 시간적 차원을 개념적으로 해석합니다. 결과적으로 이 작품은 새로운 미학을 정립할 뿐만 아니라 무빙 이미지를 제작하는 새로운 접근 방식을 제시하며, <strong>레프 마노비치(Lev Manovich)</strong>가 이론화한 바와 같이 <strong>'내비게이션(탐색) 행위'</strong> 자체를 뉴미디어 아트의 도발적인 표현 양식으로 해석합니다.
+                                </p>
+                            </>
+                        )}
                         
                         <p style={{ marginTop: '30px', fontSize: '12px', opacity: 0.5 }}>
                             Jeanyoon Choi (최정윤) | Kaist XD Lab<br/>
@@ -639,6 +667,10 @@ export default function BGCVisualization() {
                                 www.portfolio-jyc.org
                             </a>
                         </p>
+                        
+                        <S.CancelButton onClick={() => setShowInfo(false)}>
+                            Close
+                        </S.CancelButton>
                     </S.ModalContent>
                 </S.InfoModal>
             </S.InfoModalOverlay>

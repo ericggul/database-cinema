@@ -59,6 +59,8 @@ export const UIOverlay = styled.div`
   box-sizing: border-box;
 `;
 
+
+
 export const LanguageToggle = styled.button`
   position: absolute;
   top: 20px;
@@ -92,33 +94,39 @@ export const BottomControls = styled.div`
 export const LayoutSelector = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
+  justify-content: space-between; /* Space out elements */
+  gap: 10px;
   padding: 10px 20px;
-  border-radius: 20px;
+  border-radius: 30px; /* More rounded */
+  width: 90%; /* Wider */
+  max-width: 500px; /* Max width constraint */
   
   /* Glass UI */
-  background: rgba(30, 30, 30, 0.6); /* Lighter than black to be visible */
+  background: rgba(30, 30, 30, 0.6);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 `;
 
+export const ControlGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
 export const ArrowButton = styled.button`
   background: none;
   border: none;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
-  padding: 10px;
+  padding: 8px;
   opacity: 0.7;
   transition: opacity 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
 
   &:hover {
     opacity: 1;
@@ -127,74 +135,93 @@ export const ArrowButton = styled.button`
 
 export const LayoutInfo = styled.div`
   text-align: center;
-  min-width: 150px; /* Prevent layout shift */
+  flex: 1; /* Take up remaining space */
 `;
 
 export const LayoutName = styled.div`
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const LayoutSub = styled.div`
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.6;
-`;
-
-export const Footer = styled.div`
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  pointer-events: auto;
-  z-index: 30;
-`;
-
-export const RightControls = styled.div`
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  pointer-events: auto;
-  z-index: 30;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const IconButton = styled.button`
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(30, 30, 30, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.2);
     color: white;
-    background: rgba(50, 50, 50, 0.8);
   }
   
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
+`;
+
+export const InfoIcon = styled.button`
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 18px;
+  font-family: serif;
+  font-style: italic;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  width: 36px;
+  height: 36px;
+
+  &:hover {
+    color: white;
+  }
+`;
+
+export const ShakeButton = styled.button`
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+
+  &:hover {
+    color: white;
+  }
+
   svg {
     width: 20px;
     height: 20px;
     fill: currentColor;
   }
-`;
-
-export const InfoIcon = styled(IconButton)`
-  font-style: italic;
-  font-family: serif;
-  font-size: 18px;
-`;
-
-export const ShakeButton = styled(IconButton)`
-  font-size: 18px;
 `;
 
 export const InfoModalOverlay = styled.div`
@@ -243,6 +270,14 @@ export const InfoModal = styled.div`
   }
 `;
 
+export const ModalLabel = styled.div`
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+`;
+
 export const ModalTitle = styled.h2`
   font-size: 14px;
   font-weight: 600;
@@ -283,16 +318,42 @@ export const CloseButton = styled.button`
   position: absolute;
   top: 20px;
   right: 20px;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
   cursor: pointer;
-  padding: 5px;
-  line-height: 1;
+  transition: all 0.2s;
+  z-index: 10;
   
   &:hover {
-    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
   }
 `;
+
+export const CancelButton = styled.button`
+  width: 100%;
+  padding: 15px;
+  margin-top: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+`;
+
 
