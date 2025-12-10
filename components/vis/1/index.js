@@ -195,7 +195,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   const meshRef = useRef();
   const [atlas, setAtlas] = useState(null);
   
-  const { N, spacing, cubeSize, layout } = config;
+  const { N, spacing, cubeSize, layout, startHour } = config;
   const count = N * N * N;
 
   // --- Atlas Generation ---
@@ -214,6 +214,9 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     let i = 0;
     const offset = (N - 1) * spacing / 2;
     
+    // Calculate hour offset index (0-11) from startHour (0, 2, ..., 22)
+    const startHourIdx = startHour / 2;
+
     for (let x = 0; x < N; x++) {
       for (let y = 0; y < N; y++) {
         for (let z = 0; z < N; z++) {
@@ -224,7 +227,8 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
            
            // Texture Index
            const yearIdx = x % 12;
-           const hourIdx = z % 12;
+           // Apply time slicing offset
+           const hourIdx = (z + startHourIdx) % 12;
            idx[i] = (yearIdx * 12) + hourIdx;
            
            i++;
@@ -232,7 +236,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
       }
     }
     return { cubePositions: pos, indexArray: idx };
-  }, [N, spacing, count]);
+  }, [N, spacing, count, startHour]);
 
   // 2. Determine Target Positions
   const targetPositions = useMemo(() => {
@@ -336,7 +340,10 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
         const x = Math.floor(id / (N * N));
         
         const yearIdx = x % 12;
-        const hourIdx = z % 12;
+        
+        // Apply time slicing offset for metadata
+        const startHourIdx = startHour / 2;
+        const hourIdx = (z + startHourIdx) % 12;
         const textureIndex = (yearIdx * 12) + hourIdx;
         
         onHover({
@@ -357,7 +364,10 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
         const x = Math.floor(id / (N * N));
         
         const yearIdx = x % 12;
-        const hourIdx = z % 12;
+        
+        // Apply time slicing offset for metadata
+        const startHourIdx = startHour / 2;
+        const hourIdx = (z + startHourIdx) % 12;
         
         onClick({
           year: YEARS[yearIdx],
@@ -442,6 +452,7 @@ export default function VisInteractive() {
     N: { value: 24, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
     spacing: { value: 3, min: 0.1, max: 5.0, step: 0.1 },
     cubeSize: { value: 1.0, min: 0.1, max: 4.0, step: 0.1 },
+    startHour: { value: 0, options: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22], label: "Start Hour" },
   });
 
   const { recording, startRecording, stopRecording } = useRecorder();
