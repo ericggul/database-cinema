@@ -529,20 +529,21 @@ function AtlasCubeGrid({ layoutIndex, onLoad, onCubeClick, selectedInstanceId })
 }
 
 // --- Camera Animator ---
-function CameraAnimator({ targetPosition, controlsRef }) {
+function CameraAnimator({ targetPosition, controlsRef, isCameraAnimating }) {
   const { camera } = useThree();
   const vec = new THREE.Vector3();
-  const isAnimating = useRef(false);
+  // const isAnimating = useRef(false); // Use passed ref instead
   
   // Trigger animation when targetPosition changes
   useEffect(() => {
       if (targetPosition) {
-          isAnimating.current = true;
+          // isAnimating.current = true;
+          if (isCameraAnimating) isCameraAnimating.current = true;
       }
-  }, [targetPosition]);
+  }, [targetPosition, isCameraAnimating]);
   
   useFrame((state, delta) => {
-    if (!controlsRef.current || !targetPosition || !isAnimating.current) return;
+    if (!controlsRef.current || !targetPosition || !isCameraAnimating?.current) return;
 
     // 1. Animate controls target to the exact cube position
     const currentTarget = controlsRef.current.target;
@@ -558,7 +559,7 @@ function CameraAnimator({ targetPosition, controlsRef }) {
     vec.copy(camera.position).sub(currentTarget).normalize();
     
     // Desired distance (zoom level)
-    const zoomDist = 1.5; 
+    const zoomDist = 5; 
     const desiredPos = targetPosition.clone().add(vec.multiplyScalar(zoomDist));
     
     camera.position.lerp(desiredPos, step);
@@ -567,7 +568,9 @@ function CameraAnimator({ targetPosition, controlsRef }) {
     
     // Stop animating when close enough to allow free rotation
     if (distToTarget < 0.01 && camera.position.distanceTo(desiredPos) < 0.01) {
-        isAnimating.current = false;
+        // isAnimating.current = false;
+        if (isCameraAnimating) isCameraAnimating.current = false;
+        
         // Ensure final snap
         controlsRef.current.target.copy(targetPosition);
         camera.position.copy(desiredPos); // Snap camera to final desired position
@@ -581,7 +584,7 @@ function CameraAnimator({ targetPosition, controlsRef }) {
 // ... (AtlasCubeGrid remains same) ...
 
 // --- Gyro Orbit Controls ---
-function GyroOrbitControls({ controlsRef, enabled }) {
+function GyroOrbitControls({ controlsRef, enabled, isCameraAnimating }) {
   const { camera } = useThree();
   const [initialOrientation, setInitialOrientation] = useState(null);
   const currentOrientation = useRef({ alpha: 0, beta: 0, gamma: 0 });
@@ -635,6 +638,13 @@ function GyroOrbitControls({ controlsRef, enabled }) {
   
   useFrame((state, delta) => {
       if (!enabled || !controlsRef.current || isInteracting.current) return;
+      
+      // If camera is being animated by CameraAnimator, pause gyro control
+      // and reset initial orientation so we re-capture the new position when animation ends
+      if (isCameraAnimating && isCameraAnimating.current) {
+          setInitialOrientation(null);
+          return;
+      }
       
       const { alpha, beta } = currentOrientation.current;
       
@@ -708,6 +718,7 @@ export default function BGCVisualization() {
   const [selectedInfo, setSelectedInfo] = useState(null);
   const [selectedInstanceId, setSelectedInstanceId] = useState(null);
   const controlsRef = useRef();
+  const isCameraAnimating = useRef(false); // Shared ref for animation state
 
   // Detect browser language on mount
   useEffect(() => {
@@ -811,14 +822,14 @@ export default function BGCVisualization() {
             ref={controlsRef}
             enablePan={false} 
             enableZoom={true} 
-            minDistance={10} 
+            minDistance={1.0} 
             maxDistance={300}
             autoRotate={!useGyro} // Keep rotating even if focused, unless gyro is on
             autoRotateSpeed={0.5}
             // enabled={!useGyro} // REMOVED: Keep OrbitControls enabled for touch interaction
         />
-        <GyroOrbitControls controlsRef={controlsRef} enabled={useGyro} />
-        <CameraAnimator targetPosition={focusTarget} controlsRef={controlsRef} />
+        <GyroOrbitControls controlsRef={controlsRef} enabled={useGyro} isCameraAnimating={isCameraAnimating} />
+        <CameraAnimator targetPosition={focusTarget} controlsRef={controlsRef} isCameraAnimating={isCameraAnimating} />
         
       </Canvas>
 
