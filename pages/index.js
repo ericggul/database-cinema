@@ -1,8 +1,12 @@
 import Interaction from '@/components/bgc'
+import Head from 'next/head'
 
 export default function Home() {
   return (
     <>
+      <Head>
+        <title>GTNSODCSICSHECPCCOSPSEPABTDANGODCITAOGAIGV1GIOBSOEDSF1T2AF0HT2HCA1B1PPWFTCIOTDIAWPATGAIWFTBOTDCSENOANABAANATCMIAITAONAAPEONMAALMT(GenerativeTopologicalNavigationStudyOfDifferentCoordinateSystemsIncludingCubeSphereCylinderHelixEllipticCylindricalParabolicCylindricalConicalOblateSpheroidalProlateSpheroidalEllipsoidalParaboloidalAndBisphericalToDefineANewGrammarOfDatabaseCinemaInTheAgeOfGenerativeAIGeneratedVia144GenerativeImagesOfBulgwangcheonStreamOfEunpyeongDistrictSeoulFrom1915To2025AndFrom00HrTo22HrCreatingA12By12ParametricPlaneWhichFormsTheConceptualInterpretationOfTemporalDimensionInAssociationWithParametricApproachToGenerativeAIWhichFormsTheBasisOfTheseDifferentCoordinateSystemsEstablishingNotOnlyANewAestheticButAlsoANewApproachToCreatingMovingImageAndInterpretingTheActOfNavigationAsAProvocativeExpressionOfNewMediaArtAsLevManovichTheorised)</title>
+      </Head>
       <Interaction />
     </>
   );
