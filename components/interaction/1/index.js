@@ -653,7 +653,7 @@ function useRecorder(onStart, onStop) {
 
 
 // --- Camera Helper ---
-function CameraHelper({ controlsRef, onUpdate }) {
+function CameraHelper({ controlsRef }) {
   const { camera } = useThree();
   const isUpdatingLeva = useRef(false);
   const lastState = useRef({ position: [0,0,0], target: [0,0,0] });
@@ -714,8 +714,6 @@ function CameraHelper({ controlsRef, onUpdate }) {
             
             lastState.current.position = currentPos;
             lastState.current.target = currentTarget;
-            
-            if (onUpdate) onUpdate({ position: currentPos, target: currentTarget });
         }
     }
   });
@@ -727,7 +725,6 @@ export default function VisInteractive() {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [recordMode, setRecordMode] = useState(false);
-  const [cameraState, setCameraState] = useState(null);
   
   // Animation State
   const [isAnimating, setIsAnimating] = useState(false);
@@ -828,7 +825,7 @@ export default function VisInteractive() {
             setConfig={setConfig} 
           />
           
-          <CameraHelper controlsRef={controlsRef} onUpdate={setCameraState} />
+          <CameraHelper controlsRef={controlsRef} />
 
           <AtlasCubeGrid 
             onHover={setHovered} 
@@ -847,13 +844,16 @@ export default function VisInteractive() {
           Total: {config.N ** 3}<br/>
           Layout: {config.layout}<br/>
           <br/>
-          {cameraState ? (
+          {activeItem ? (
             <>
-              <strong>Camera Pos:</strong> [{cameraState.position.map(v => v.toFixed(2)).join(', ')}]<br/>
-              <strong>Target:</strong> [{cameraState.target.map(v => v.toFixed(2)).join(', ')}]
+              <strong>Year:</strong> {activeItem.year}<br/>
+              <strong>Month:</strong> {activeItem.month}<br/>
+              <strong>Hour:</strong> {activeItem.hour}<br/>
+              <strong>ID:</strong> {activeItem.id}<br/>
+              <strong>Pos:</strong> {activeItem.gridPos.x}, {activeItem.gridPos.y}, {activeItem.gridPos.z}
             </>
           ) : (
-            "Move camera to see coords"
+            "Hover over a cube"
           )}
         </Info>
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', pointerEvents: 'auto' }}>
