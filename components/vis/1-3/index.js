@@ -362,6 +362,12 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   const startHour = 12; // Hardcoded to prevent floating-point flickering
   const count = N * N * N;
 
+  // Debug Log: Mount/Unmount
+  useEffect(() => {
+      console.log(`[AtlasCubeGrid] MOUNTED`);
+      return () => console.log(`[AtlasCubeGrid] UNMOUNTED`);
+  }, []);
+
   // --- Atlas Generation ---
   useEffect(() => {
     createAtlas(IMAGE_PATHS).then(data => {
@@ -372,8 +378,9 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   }, []);
 
   // 1a. Index Array (Texture Mapping)
-  // Depends only on N. Stable during animation.
+  // Depends only on N and startHour. Stable when spacing changes.
   const indexArray = useMemo(() => {
+    console.log(`[AtlasCubeGrid] Recalculating IndexArray for N=${N}, startHour=${startHour}`);
     const idx = new Float32Array(MAX_COUNT);
     let i = 0;
     
@@ -392,15 +399,36 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     return idx;
   }, [N, startHour]);
 
-  // 2. Target Positions (UNIT SPACE - spacing applied in useFrame)
-  // Only depends on layout and N. NEVER recalculates during spacing/cubeSize interpolation.
+  // 1b. Canonical Cube Positions (Start Positions)
+  // Depends on N and spacing.
+  const cubePositions = useMemo(() => {
+    // console.log(`[AtlasCubeGrid] Recalculating CubePositions for N=${N}, Spacing=${spacing}`);
+    const pos = new Float32Array(MAX_COUNT * 3);
+    let i = 0;
+    const offset = (N - 1) * spacing / 2;
+
+    for (let x = 0; x < N; x++) {
+      for (let y = 0; y < N; y++) {
+        for (let z = 0; z < N; z++) {
+           pos[i*3] = (x * spacing) - offset;
+           pos[i*3+1] = (y * spacing) - offset;
+           pos[i*3+2] = (z * spacing) - offset;
+           i++;
+        }
+      }
+    }
+    return pos;
+  }, [N, spacing]);
+
+  // 2. Determine Target Positions
   const targetPositions = useMemo(() => {
+    // We need to ensure getOtherLayoutPositions returns MAX sized array or we map it
+    // Let's modify getOtherLayoutPositions to return MAX sized array or just fill ours
     const positions = new Float32Array(MAX_COUNT * 3);
-    // Use spacing=1 for unit positions, actual spacing applied at render time
-    const calculated = getOtherLayoutPositions(layout, count, N, 1.0, 1.0, startHour);
-    positions.set(calculated);
+    const calculated = getOtherLayoutPositions(layout, count, N, spacing, cubeSize, startHour);
+    positions.set(calculated); // Copy valid data
     return positions;
-  }, [layout, N, count, startHour]);
+  }, [layout, N, spacing, count, cubeSize, startHour]);
 
   // 3. State for Animation
   const currentPositions = useRef(null);
@@ -415,12 +443,23 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     startPositions.current.set(targetPositions);
   }
 
-  // Spring for transition (tension 60 = 2x slower than original 120)
+  // Spring for transition
   const [{ t, smoothSize }, api] = useSpring(() => ({
     t: 1,
     smoothSize: cubeSize,
-    config: { mass: 1, tension: 90, friction: 20 },
+    config: { mass: 1, tension: 120, friction: 20 },
   }));
+
+  // Debug Log: Prop Changes (Moved here to access api)
+  const prevDeps = useRef({ N, startHour, layout, api });
+  useEffect(() => {
+      if (prevDeps.current.N !== N) console.log(`[AtlasCubeGrid] N changed: ${prevDeps.current.N} -> ${N}`);
+      if (prevDeps.current.startHour !== startHour) console.log(`[AtlasCubeGrid] startHour changed: ${prevDeps.current.startHour} -> ${startHour}`);
+      if (prevDeps.current.layout !== layout) console.log(`[AtlasCubeGrid] layout changed: ${prevDeps.current.layout} -> ${layout}`);
+      if (prevDeps.current.api !== api) console.log(`[AtlasCubeGrid] api changed (ref mismatch)`);
+      
+      prevDeps.current = { N, startHour, layout, api };
+  });
 
   // Update smoothSize when cubeSize changes
   useEffect(() => {
@@ -428,12 +467,16 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   }, [cubeSize, api]);
 
   // Capture start positions when layout changes
+  // CRITICAL FIX: Only trigger on LAYOUT change. 
+  // Spacing/N changes should not reset the spring, they should just update targetPositions.
   useEffect(() => {
+    console.log(`[AtlasCubeGrid] Layout Effect Triggered. Layout=${layout}`);
     if (currentPositions.current) {
         startPositions.current.set(currentPositions.current);
+        // Reset animation
         api.start({ t: 1, from: { t: 0 }, reset: true });
     }
-  }, [layout, api]); 
+  }, [layout, api]); // Removed N and spacing from dependencies 
 
   const tempObject = useMemo(() => new THREE.Object3D(), []);
 
@@ -442,32 +485,29 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
     
     // Update count dynamically
     if (meshRef.current.count !== count) {
+        console.log(`[AtlasCubeGrid] Updating Mesh Count: ${meshRef.current.count} -> ${count}`);
         meshRef.current.count = count;
     }
 
     const progress = t.get();
     const currentSize = smoothSize.get();
     
-    // Get current spacing from config (smooth interpolation handled by AnimationController)
-    const currentSpacing = spacing;
-    
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
       const iy = i * 3 + 1;
       const iz = i * 3 + 2;
 
-      // Get unit-space position (interpolated for layout transitions)
-      const ux = THREE.MathUtils.lerp(startPositions.current[ix], targetPositions[ix], progress);
-      const uy = THREE.MathUtils.lerp(startPositions.current[iy], targetPositions[iy], progress);
-      const uz = THREE.MathUtils.lerp(startPositions.current[iz], targetPositions[iz], progress);
+      // Interpolate
+      const x = THREE.MathUtils.lerp(startPositions.current[ix], targetPositions[ix], progress);
+      const y = THREE.MathUtils.lerp(startPositions.current[iy], targetPositions[iy], progress);
+      const z = THREE.MathUtils.lerp(startPositions.current[iz], targetPositions[iz], progress);
 
-      // Update current unit positions ref for next start point
-      currentPositions.current[ix] = ux;
-      currentPositions.current[iy] = uy;
-      currentPositions.current[iz] = uz;
+      // Update current positions ref for next start point
+      currentPositions.current[ix] = x;
+      currentPositions.current[iy] = y;
+      currentPositions.current[iz] = z;
 
-      // Apply spacing as a multiplier (this makes spacing changes smooth without recalculating arrays)
-      tempObject.position.set(ux * currentSpacing, uy * currentSpacing, uz * currentSpacing);
+      tempObject.position.set(x, y, z);
       tempObject.scale.set(currentSize, currentSize, currentSize);
       
       if (layout === 'Sphere' || layout === 'Cylinder' || layout === 'Helix') {
@@ -486,8 +526,9 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   // Initial Attribute Setup & Update
   React.useLayoutEffect(() => {
     if (meshRef.current) {
-      // If attribute doesn't exist, create it
+      // If attribute doesn't exist or we need to update it
       if (!meshRef.current.geometry.attributes.aAtlasIndex) {
+          console.log("[AtlasCubeGrid] Creating aAtlasIndex Attribute");
           meshRef.current.geometry.setAttribute(
             'aAtlasIndex',
             new THREE.InstancedBufferAttribute(new Float32Array(MAX_COUNT), 1)
@@ -495,8 +536,9 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
       }
       
       // Update data
+      console.log(`[AtlasCubeGrid] Updating aAtlasIndex data for N=${N}`);
       const attr = meshRef.current.geometry.attributes.aAtlasIndex;
-      attr.array.set(indexArray);
+      attr.array.set(indexArray); // indexArray is MAX_COUNT size
       attr.needsUpdate = true;
     }
   }, [indexArray, atlas]);
@@ -572,7 +614,7 @@ function AtlasCubeGrid({ onHover, onClick, config }) {
   );
 }
 
-import keyframes from "./keyframes3.json";
+import keyframes from "./keyframes2.json";
 
 // --- Animation Controller ---
 function AnimationController({ isPlaying, time, setConfig, setCamera }) {
@@ -646,8 +688,13 @@ function AnimationController({ isPlaying, time, setConfig, setCamera }) {
     const N = startFrame.config.N;
     const spacing = THREE.MathUtils.lerp(startFrame.config.spacing, endFrame.config.spacing, easedProgress);
     
-    // cubeSize now interpolates smoothly like spacing
-    const cubeSize = THREE.MathUtils.lerp(startFrame.config.cubeSize, endFrame.config.cubeSize, easedProgress);
+    // Use snappy progress for cubeSize ONLY if it changes
+    let cubeSize;
+    if (Math.abs(startFrame.config.cubeSize - endFrame.config.cubeSize) < 0.001) {
+        cubeSize = startFrame.config.cubeSize;
+    } else {
+        cubeSize = THREE.MathUtils.lerp(startFrame.config.cubeSize, endFrame.config.cubeSize, cubeEased);
+    }
 
     setConfig({
       layout: startFrame.config.layout, // Discrete
@@ -979,7 +1026,7 @@ export default function VisInteractive() {
     const elapsed = (time - startTimeRef.current) / 1000; // seconds
     animationTime.current = elapsed;
     
-    if (elapsed < 58) { // 58s duration (matches last keyframe)
+    if (elapsed < 55) { // 55s duration
       requestRef.current = requestAnimationFrame(animate);
     } else {
       stopAnimation();
