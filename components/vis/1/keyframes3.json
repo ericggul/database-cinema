@@ -16,26 +16,10 @@
         }
     },
     {
-        "time": 1,
-        "camera": {
-            "spherical": {
-                "radius": 1.3,
-                "theta": 0,
-                "phi": 90
-            }
-        },
-        "config": {
-            "layout": "Cube",
-            "N": 1,
-            "spacing": 2.0,
-            "cubeSize": 1.0
-        }
-    },
-    {
         "time": 2,
         "camera": {
             "spherical": {
-                "radius": 3,
+                "radius": 1.3,
                 "theta": 0,
                 "phi": 90
             }
@@ -112,7 +96,7 @@
         }
     },
     {
-        "time": 9,
+        "time": 10,
         "camera": {
             "spherical": {
                 "radius": 50,
@@ -128,28 +112,12 @@
         }
     },
     {
-        "time": 11,
-        "camera": {
-            "spherical": {
-                "radius": 15,
-                "theta": 45,
-                "phi": 69
-            }
-        },
-        "config": {
-            "layout": "Cube",
-            "N": 24,
-            "spacing": 3.0,
-            "cubeSize": 1.0
-        }
-    },
-    {
         "time": 14,
         "camera": {
             "spherical": {
-                "radius": 50,
+                "radius": 61.4,
                 "theta": 90,
-                "phi": 60
+                "phi": 90
             }
         },
         "config": {
@@ -165,7 +133,7 @@
             "spherical": {
                 "radius": 60,
                 "theta": 120,
-                "phi": 75
+                "phi": 110
             }
         },
         "config": {
@@ -181,7 +149,7 @@
             "spherical": {
                 "radius": 250,
                 "theta": 180,
-                "phi": 85
+                "phi": 90
             }
         },
         "config": {
@@ -195,7 +163,7 @@
         "time": 26,
         "camera": {
             "spherical": {
-                "radius": 75,
+                "radius": 70,
                 "theta": 225,
                 "phi": 70
             }
@@ -220,7 +188,7 @@
             "layout": "Oblate Spheroidal",
             "N": 24,
             "spacing": 1.5,
-            "cubeSize": 0.7
+            "cubeSize": 0.5
         }
     },
     {
@@ -228,15 +196,15 @@
         "camera": {
             "spherical": {
                 "radius": 70,
-                "theta": 290,
-                "phi": 55
+                "theta": 270,
+                "phi": 60
             }
         },
         "config": {
             "layout": "Prolate Spheroidal",
             "N": 24,
             "spacing": 2.4,
-            "cubeSize": 0.7
+            "cubeSize": 1.5
         }
     },
     {
@@ -244,8 +212,8 @@
         "camera": {
             "spherical": {
                 "radius": 115,
-                "theta": 360,
-                "phi": 50
+                "theta": 270,
+                "phi": 90
             }
         },
         "config": {
@@ -259,9 +227,9 @@
         "time": 42,
         "camera": {
             "spherical": {
-                "radius": 45,
-                "theta": 405,
-                "phi": 55
+                "radius": 67,
+                "theta": 315,
+                "phi": 90
             }
         },
         "config": {
@@ -276,7 +244,7 @@
         "camera": {
             "spherical": {
                 "radius": 70,
-                "theta": 450,
+                "theta": 270,
                 "phi": 65
             }
         },
@@ -292,8 +260,8 @@
         "camera": {
             "spherical": {
                 "radius": 15,
-                "theta": 540,
-                "phi": 85
+                "theta": 360,
+                "phi": 90
             }
         },
         "config": {
@@ -308,7 +276,7 @@
         "camera": {
             "spherical": {
                 "radius": 50,
-                "theta": 540,
+                "theta": 450,
                 "phi": 90
             }
         },
@@ -323,9 +291,9 @@
         "time": 60,
         "camera": {
             "spherical": {
-                "radius": 1000,
-                "theta": 540,
-                "phi": 90
+                "radius": 110,
+                "theta": 450,
+                "phi": 0
             }
         },
         "config": {

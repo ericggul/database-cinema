@@ -689,11 +689,11 @@ function useRecorder(onStart, onStop) {
     
     if (onStart) onStart();
 
-    // 30 FPS for stability, 25 Mbps for high quality
+    // 30 FPS for stability, 5 Mbps for high quality (optimized from 25 Mbps)
     const stream = canvas.captureStream(30); 
     const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: 'video/webm;codecs=vp9',
-      videoBitsPerSecond: 25000000 
+      mimeType: 'video/webm', // Let browser choose best codec (usually VP8/VP9)
+      videoBitsPerSecond: 5000000 
     });
 
     mediaRecorderRef.current = mediaRecorder;

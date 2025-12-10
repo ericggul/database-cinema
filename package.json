@@ -15,6 +15,7 @@
     "@react-three/postprocessing": "^3.0.4",
     "@react-three/rapier": "^2.1.0",
     "deck.gl": "^9.1.13",
+    "html2canvas": "^1.4.1",
     "leva": "^0.10.0",
     "lodash": "^4.17.21",
     "mapbox-gl": "^3.13.0",

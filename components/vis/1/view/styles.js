@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 
 export const Container = styled.div`
   width: 100vw;
@@ -10,53 +10,90 @@ export const Container = styled.div`
 `;
 
 export const RecordContainer = styled.div`
+  position: relative;
   width: 420px;
   height: 432px;
-  background: #000;
-  color: #fff;
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Monaco', monospace;
+  background: #0D0D0D;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: 40px;
-  box-sizing: border-box;
-  position: relative;
-  overflow: hidden;
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
 `;
 
-export const LayoutName = styled.div`
-  font-size: 2.4rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 6px;
-  color: #fff;
-  transition: opacity 0.3s ease;
+// Top: Angle (r, theta, phi)
+export const TopSection = styled.div`
+  position: absolute;
+  top: 40px; /* Adjusted for visual balance */
+  width: 100%;
+  display: flex;
+  justify-content: center;
 `;
 
-export const LayoutNameKr = styled.div`
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 40px;
-  letter-spacing: 0.08em;
+export const AngleText = styled.div`
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+  text-align: center;
+  color: #F5F5F5;
 `;
 
-export const CubeCount = styled.div`
-  font-size: 5rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  margin-bottom: 8px;
-  font-variant-numeric: tabular-nums;
-  transition: all 0.3s ease;
+// Middle: Names
+export const MiddleSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Space between Korean and English */
 `;
 
-export const CubeLabel = styled.div`
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.4);
+export const NameKr = styled.div`
+  width: 303px;
+  height: 67px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 60px;
+  line-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #F5F5F5;
+  white-space: nowrap;
+`;
+
+export const NameEn = styled.div`
+  width: 303px;
+  height: 67px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 60px;
+  line-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #F5F5F5;
   text-transform: uppercase;
-  letter-spacing: 0.25em;
+`;
+
+// Bottom: Dimensions
+export const BottomSection = styled.div`
+  position: absolute;
+  bottom: 40px; /* Adjusted for visual balance */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+`;
+
+export const DimensionsText = styled.div`
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+  text-align: center;
+  color: #F5F5F5;
 `;
 
 export const Controls = styled.div`
@@ -80,10 +117,5 @@ export const Button = styled.button`
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
-  }
-
-  &.recording {
-    background: rgba(255, 0, 0, 0.3);
-    border-color: #f00;
   }
 `;
