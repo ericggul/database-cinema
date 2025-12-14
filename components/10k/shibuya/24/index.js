@@ -25,7 +25,7 @@ import {
 
 let jsZipPromise = null;
 
-const YEARS = Array.from({ length: 12 }, (_, i) => 1915 + i * 10); // 1915..2025 step 10 (12 items)
+const YEARS = Array.from({ length: 12 }, (_, i) => 1965 + i * 10); // 1965..2075 step 10 (12 items)
 const MONTHS = [
   "January","February","March","April","May","June","July","August","September","October","November","December"
 ];
@@ -45,7 +45,7 @@ const formatId = (year, month, hour) => {
 const AXES = ["year", "month", "hour"];
 
 export default function SceneTransformerDualAxis() {
-  const [axisA, setAxisA] = useState("year");
+  const [axisA, setAxisA] = useState("month");
   const [axisB, setAxisB] = useState("hour");
   const [anchorYear, setAnchorYear] = useState(2025);
   const [anchorMonth, setAnchorMonth] = useState("January");
@@ -103,14 +103,36 @@ export default function SceneTransformerDualAxis() {
             "Rooftop park atmosphere, 'urban space lifted into the air'",
             "Camera angled to capture the vast sky above the park, with glimpses of the surrounding Shibuya skyline at the edges",
             "The sky is the main subject, showcasing meteorological phenomena (clouds, light, wind patterns)",
+            "Sky Condition: Realistic Tokyo sky with variable cloud cover, atmospheric haze, and dynamic lighting. Avoid generic clear blue skies.",
             "Do not change angle or composition",
           ].join(", ")
-        : [
+        : location === "bukhansan"
+        ? [
             "Photo-real Bukhansan overlook toward old Seoul four-gate area",
             "large rock fixed on left foreground, small grass patch in front, drop-off behind it",
             "wide Seoul cityscape beyond the drop-off; keep the same skyline framing",
             "do not change camera angle or composition",
-          ].join(", ");
+          ].join(", ")
+        :
+        [
+            "Photo-real Shibuya Scramble Crossing, Shibuya, Tokyo",
+            "Fixed Camera Position: Eye-level view from the Shibuya Station side looking towards Q-FRONT.",
+            "Main Subject: The Scramble Crossing in the foreground.",
+            "Background Composition: Q-FRONT (Tsutaya) building on the right. 109 Building visible in the distance on the left.",
+            "Sky Visibility: Low angle shot (looking up) to ensure the sky occupies the top 50% of the frame.",
+            "Lens: 24mm Wide Angle.",
+            "Constraint: DO NOT ZOOM. DO NOT CHANGE ANGLE. KEEP THIS EXACT COMPOSITION.",
+          ].join(", ")
+
+    const getWeatherCondition = (m) => {
+      if (m === "January") return "Heavy snow, winter atmosphere, accumulation on ground/trees.";
+      if (m === "April") return "Cherry blossoms (Sakura) in full bloom, pink petals in the air, spring atmosphere.";
+      if (m === "July") return "Heavy rain (Tsuyu season), wet pavement reflections, overcast dramatic sky.";
+      if (m === "October") return "Autumn foliage, golden/red leaves, crisp clear autumn air.";
+      if (m === "December") return "Winter atmosphere, festive Christmas decorations. A large Christmas tree is visible in the park. If night, dazzling Christmas illuminations and city lights.";
+      return `Typical Tokyo weather for ${m}: variable clouds, humid atmosphere, potential urban haze, not perfectly clear.`;
+    };
+    const weatherCondition = getWeatherCondition(month);
 
     return [
       "Ultra-realistic, photographic quality.",
@@ -120,11 +142,18 @@ export default function SceneTransformerDualAxis() {
       `- Year ${year}: The image MUST reflect the historical era (buildings, cars, fashion, atmosphere) of ${year}.`,
       `- Month ${month}: The image MUST reflect the season (foliage, weather, clothing) of ${month}.`,
       `- Time ${hour}: The image MUST reflect the exact lighting conditions of ${hourText}. Time is strictly 24-hour format. 12:00 is NOON (Bright Daylight). 00:00 is MIDNIGHT (Dark Night).`,
+      `- Weather: ${weatherCondition} The sky and weather conditions MUST match this description.`,
       "Use strict 24-hour notation: 00:00 is midnight (dark), 12:00 is midday/noon (bright).",
       timeLighting + ".",
       "Reflect the correct season for that month (foliage, sky, atmosphere, clothing cues if visible).",
       "Lighting/sky must match time-of-day and season: bright daylight for midday; warm low sun for late afternoon; dark night with artificial lights for 22:00; pre-dawn faint light for early hours.",
       "If the time is evening or night (e.g., 18:00 - 05:00), capture the vibrant Shibuya nightscape with neon lights, illuminated signage, and city glow appropriate for the era.",
+      year > 2025 ? `
+      FUTURE SPECULATION:
+      - For years after 2025, speculate on the future evolution of Tokyo/Shibuya.
+      - Depict advanced technology, evolved architecture, and futuristic fashion while maintaining the recognizable layout of Shibuya.
+      - The atmosphere should reflect a plausible sci-fi future appropriate for the year ${year}.
+      ` : "",
       "Do not render any text, signage, or watermarks in the image.",
       "Maintain the exact described vantage and framing; do not alter camera angle or composition.",
       additionalPrompt ? `Additional directives: ${additionalPrompt}` : "",

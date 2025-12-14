@@ -24,14 +24,14 @@ import {
 } from "./styles";
 
 export default function SceneTransformerStandard() {
-  const YEARS = useMemo(() => [1935, 1945, 1955, 1965, 1975, 1985, 1995, 2005, 2015, 2025], []);
+  const YEARS = useMemo(() => [1965, 1975, 1985, 1995, 2005, 2015, 2025, 2035, 2045, 2055, 2065, 2075], []);
   const MONTHS = useMemo(() => [
     "January","February","March","April","May","June","July","August","September","October","November","December"
   ], []);
   const HOURS = useMemo(() => Array.from({ length: 12 }, (_, i) => i * 2).map((h) => `${String(h).padStart(2, "0")}:00`), []);
 
   const [axis, setAxis] = useState("year"); // year | month | hour
-  const [anchorYear, setAnchorYear] = useState(2024);
+  const [anchorYear, setAnchorYear] = useState(2025);
   const [anchorMonth, setAnchorMonth] = useState("July");
   const [anchorHour, setAnchorHour] = useState("12:00");
   const [additionalPrompt, setAdditionalPrompt] = useState("");
@@ -60,16 +60,18 @@ export default function SceneTransformerStandard() {
             "Rooftop park atmosphere, 'urban space lifted into the air'",
             "Camera angled to capture the vast sky above the park, with glimpses of the surrounding Shibuya skyline at the edges",
             "The sky is the main subject, showcasing meteorological phenomena (clouds, light, wind patterns)",
+            "Sky Condition: Realistic Tokyo sky with variable cloud cover, atmospheric haze, and dynamic lighting. Avoid generic clear blue skies.",
             "Do not change angle or composition",
           ].join(", ")
         : location === "scramble"
         ? [
             "Photo-real Shibuya Scramble Crossing, Shibuya, Tokyo",
-            "Camera facing 100% true North",
-            "Composition: Shibuya Koen Dori in the exact center, Center-gai on the left side",
-            "Sky clearly visible above the buildings",
-            "Wide angle to capture the crossing scale and the sky",
-            "Do not change angle or composition",
+            "Fixed Camera Position: Eye-level view from the Shibuya Station side looking towards Q-FRONT.",
+            "Main Subject: The Scramble Crossing in the foreground.",
+            "Background Composition: Q-FRONT (Tsutaya) building on the right. 109 Building visible in the distance on the left.",
+            "Sky Visibility: Low angle shot (looking up) to ensure the sky occupies the top 50% of the frame.",
+            "Lens: 24mm Wide Angle.",
+            "Constraint: DO NOT ZOOM. DO NOT CHANGE ANGLE. KEEP THIS EXACT COMPOSITION.",
           ].join(", ")
         : [
             "Photo-real Bukhansan overlook toward old Seoul four-gate area",
@@ -79,12 +81,29 @@ export default function SceneTransformerStandard() {
             "do not change angle or composition",
           ].join(", ");
 
+    const getWeatherCondition = (m) => {
+      if (m === "January") return "Heavy snow, winter atmosphere, accumulation on ground/trees.";
+      if (m === "April") return "Cherry blossoms (Sakura) in full bloom, pink petals in the air, spring atmosphere.";
+      if (m === "July") return "Heavy rain (Tsuyu season), wet pavement reflections, overcast dramatic sky.";
+      if (m === "October") return "Autumn foliage, golden/red leaves, crisp clear autumn air.";
+      if (m === "December") return "Winter atmosphere, festive Christmas decorations. A large Christmas tree is visible in the park. If night, dazzling Christmas illuminations and city lights.";
+      return `Typical Tokyo weather for ${m}: variable clouds, humid atmosphere, potential urban haze, not perfectly clear.`;
+    };
+    const weatherCondition = getWeatherCondition(month);
+
     return `Ultra-realistic, photographic quality. ${baseLocation}. 
     STRICTLY ADHERE to the specified Year, Month, and Time:
     - Year ${year}: The image MUST reflect the historical era (buildings, cars, fashion, atmosphere) of ${year}.
     - Month ${month}: The image MUST reflect the season (foliage, weather, clothing) of ${month}.
     - Time ${hour}: The image MUST reflect the exact lighting conditions of ${hourText}. Time is strictly 24-hour format. 12:00 is NOON (Bright Daylight). 00:00 is MIDNIGHT (Dark Night).
+    - Weather: ${weatherCondition} The sky and weather conditions MUST match this description.
     - If the time is evening or night (e.g., 18:00 - 05:00), capture the vibrant Shibuya nightscape with neon lights, illuminated signage, and city glow appropriate for the era.
+    ${year > 2025 ? `
+    FUTURE SPECULATION:
+    - For years after 2025, speculate on the future evolution of Tokyo/Shibuya.
+    - Depict advanced technology, evolved architecture, and futuristic fashion while maintaining the recognizable layout of Shibuya.
+    - The atmosphere should reflect a plausible sci-fi future appropriate for the year ${year}.
+    ` : ""}
     Depict ${month} ${year} at ${hourText}. Maintain the exact described vantage and framing. ${additionalPrompt ? `Additional directives: ${additionalPrompt}` : ""}`;
   };
 
@@ -200,7 +219,7 @@ export default function SceneTransformerStandard() {
         <ControlGroup>
           <Label>Axis</Label>
           <Select value={axis} onChange={(e) => setAxis(e.target.value)}>
-            <option value="year">Year sweep (1935→2025)</option>
+            <option value="year">Year sweep (1965→2075)</option>
             <option value="month">Month sweep (Jan→Dec)</option>
             <option value="hour">Time sweep (00:00→22:00)</option>
           </Select>
@@ -278,7 +297,7 @@ export default function SceneTransformerStandard() {
 
       <ResultsContainer>
         <Label style={{ display: "block", marginBottom: "8px" }}>
-          {axis === "year" && "Batch results by decade (1935 → 2025)"}
+          {axis === "year" && "Batch results by decade (1965 → 2075)"}
           {axis === "month" && "Batch results across months (Jan → Dec)"}
           {axis === "hour" && "Batch results across day (00:00 → 22:00)"}
         </Label>
