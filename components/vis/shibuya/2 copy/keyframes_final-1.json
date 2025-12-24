@@ -3,9 +3,9 @@
         "time": 0,
         "camera": {
             "spherical": {
-                "radius": 49,
-                "theta": 44.6,
-                "phi": 61
+                "radius": 80,
+                "theta": 45,
+                "phi": 60
             },
             "target": [
                 0,
@@ -39,7 +39,7 @@
             "layout": "Scatter",
             "N": 24,
             "spacing": 4.0,
-            "cubeSize": 3.5,
+            "cubeSize": 0.8,
             "startHour": 12
         }
     },
@@ -47,9 +47,9 @@
         "time": 14,
         "camera": {
             "spherical": {
-                "radius": 300,
+                "radius": 100,
                 "theta": 225,
-                "phi": 90
+                "phi": 80
             },
             "target": [
                 0,
@@ -58,20 +58,20 @@
             ]
         },
         "config": {
-            "layout": "Elliptic Cylinder",
+            "layout": "Conical",
             "N": 24,
-            "spacing": 4.6,
-            "cubeSize": 2.5,
+            "spacing": 3.5,
+            "cubeSize": 1.2,
             "startHour": 12
         }
     },
     {
-        "time": 20,
+        "time": 21,
         "camera": {
             "spherical": {
-                "radius": 130,
+                "radius": 140,
                 "theta": 315,
-                "phi": 55
+                "phi": 30
             },
             "target": [
                 0,
@@ -83,17 +83,17 @@
             "layout": "Sphere",
             "N": 24,
             "spacing": 3.0,
-            "cubeSize": 1.2,
+            "cubeSize": 1.0,
             "startHour": 12
         }
     },
     {
-        "time": 26,
+        "time": 27,
         "camera": {
             "spherical": {
-                "radius": 0.1,
-                "theta": 450,
-                "phi": 135
+                "radius": 150,
+                "theta": 360,
+                "phi": 45
             },
             "target": [
                 0,
@@ -104,8 +104,8 @@
         "config": {
             "layout": "Sphere",
             "N": 24,
-            "spacing": 2.0,
-            "cubeSize": 0.9,
+            "spacing": 3.0,
+            "cubeSize": 1.0,
             "startHour": 12
         }
     }
