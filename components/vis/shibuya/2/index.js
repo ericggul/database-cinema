@@ -637,7 +637,7 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
 import keyframes from "./keyframes4.json";
 
 // --- Animation Controller ---
-function AnimationController({ isPlaying, time, setConfig, setCamera, animationConfigRef }) {
+function AnimationController({ isPlaying, time, setConfig, setCamera, animationConfigRef, isRecording, recordingTime }) {
   const { camera } = useThree();
   const frameCount = useRef(0);
   const lastLayout = useRef(null);
@@ -653,7 +653,7 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, animationC
 
     // Find current keyframe segment
     const totalDuration = keyframes[keyframes.length - 1].time;
-    const currentTime = time.current;
+    const currentTime = isRecording ? recordingTime : time.current;
     
     if (currentTime >= totalDuration) {
       // Loop or stop? For now, let's clamp
@@ -811,6 +811,8 @@ function useRecorder(onStart, onStop) {
 
   return { recording, startRecording, stopRecording };
 }
+
+import { useFrameRecorder } from "./recorder";
 
 
 // --- Camera Helper ---
@@ -981,6 +983,28 @@ export default function VisInteractive() {
   const [recordMode, setRecordMode] = useState(false);
   const [cameraState, setCameraState] = useState(null);
   
+  // Frame Recorder
+  const [recordingTime, setRecordingTime] = useState(0);
+  const { 
+    isRecording: isFrameRecording, 
+    progress: frameProgress, 
+    currentFrame, 
+    totalFrames, 
+    startRecording: startFrameRecording, 
+    stopRecording: stopFrameRecording 
+  } = useFrameRecorder({
+    totalFrames: 1800, // 60s @ 30fps
+    fps: 30,
+    onFrame: (t) => setRecordingTime(t),
+    onStart: () => {
+      // Stop regular animation loop
+      stopAnimation();
+    },
+    onStop: () => {
+      // Optional: Restart animation or stay paused
+    }
+  });
+  
   // Animation State
   const [isAnimating, setIsAnimating] = useState(false);
   const animationTime = useRef(0);
@@ -1116,7 +1140,7 @@ export default function VisInteractive() {
         zIndex: 0 // Ensure it's behind overlay
       }}>
         <Canvas 
-          dpr={recordMode ? 1 : 2} // Reduce DPR during recording to prevent stuttering
+          dpr={2} // Force high DPR for recording
           gl={{ preserveDrawingBuffer: true, logarithmicDepthBuffer: true }}
           onCreated={({ gl }) => {
             window._canvas = gl.domElement;
@@ -1129,10 +1153,12 @@ export default function VisInteractive() {
           <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={50} />
 
           <AnimationController 
-            isPlaying={isAnimating} 
+            isPlaying={isAnimating || isFrameRecording} 
             time={animationTime} 
             setConfig={setConfig} 
             animationConfigRef={animationConfigRef}
+            isRecording={isFrameRecording}
+            recordingTime={recordingTime}
           />
           
           <CameraHelper controlsRef={controlsRef} onUpdate={setCameraState} jumpTarget={jumpTarget} />
@@ -1180,20 +1206,44 @@ export default function VisInteractive() {
           </button>
           
           {recordMode && (
-            <button 
-              onClick={() => {
-                if (recording) stopRecording();
-                else startRecording(window._canvas);
-              }}
-              style={{ 
-                padding: '8px', 
-                cursor: 'pointer',
-                background: recording ? 'red' : 'white',
-                color: recording ? 'white' : 'black'
-              }}
-            >
-              {recording ? "Stop Recording" : "Start Recording (Auto Animation)"}
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {/* Legacy Video Recorder */}
+              <button 
+                onClick={() => {
+                  if (recording) stopRecording();
+                  else startRecording(window._canvas);
+                }}
+                style={{ 
+                  padding: '8px', 
+                  cursor: 'pointer',
+                  background: recording ? 'red' : 'white',
+                  color: recording ? 'white' : 'black'
+                }}
+              >
+                {recording ? "Stop Video" : "Record Video (WebM)"}
+              </button>
+
+              {/* New Frame Recorder */}
+              <button 
+                onClick={() => {
+                  if (isFrameRecording) stopFrameRecording();
+                  else {
+                    const now = new Date();
+                    const timestamp = now.toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/:/g, '-');
+                    const seqName = `shibuya_render_${timestamp}`;
+                    startFrameRecording(window._canvas, seqName);
+                  }
+                }}
+                style={{ 
+                  padding: '8px', 
+                  cursor: 'pointer',
+                  background: isFrameRecording ? 'blue' : 'white',
+                  color: isFrameRecording ? 'white' : 'black'
+                }}
+              >
+                {isFrameRecording ? `Rendering to Disk... ${Math.round(frameProgress)}%` : "Render to Disk (PNG Sequence)"}
+              </button>
+            </div>
           )}
         </div>
       </Overlay>
