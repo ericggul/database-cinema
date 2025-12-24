@@ -634,10 +634,25 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
   );
 }
 
-import keyframes from "./keyframes_final.json";
+import keyframesL from "./keyframes_final.json";
+import keyframesH from "./keyframes_horizontal.json";
+import keyframesHV2 from "./keyframes_horizontal_v2.json";
+import keyframesHV3 from "./keyframes_horizontal_v3.json";
+import keyframesV from "./keyframes_vertical.json";
+import keyframesV2 from "./keyframes_vertical_v2.json";
+
+const KEYFRAME_MAP = {
+  "L-shaped": keyframesL,
+  "Horizontal": keyframesH,
+  "Horizontal V2": keyframesHV2,
+  "Horizontal V3": keyframesHV3,
+  "Vertical": keyframesV, 
+  "Vertical V2": keyframesV2,
+  "Elevator": keyframesL  // Fallback
+};
 
 // --- Animation Controller ---
-function AnimationController({ isPlaying, time, setConfig, setCamera, animationConfigRef, isRecording, recordingTime }) {
+function AnimationController({ isPlaying, time, setConfig, setCamera, animationConfigRef, isRecording, recordingTime, targetScreen }) {
   const { camera } = useThree();
   const frameCount = useRef(0);
   const lastLayout = useRef(null);
@@ -650,6 +665,9 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, animationC
   
   useFrame(() => {
     if (!isPlaying) return;
+
+    // Get correct keyframes
+    const keyframes = KEYFRAME_MAP[targetScreen] || KEYFRAME_MAP["L-shaped"];
 
     // Find current keyframe segment
     const totalDuration = keyframes[keyframes.length - 1].time;
@@ -677,17 +695,24 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, animationC
     const elapsed = currentTime - startFrame.time;
     
     // Universal Delay: 2 seconds hold at start of each segment
-    const DELAY = 1.5; 
+    // For Vertical V2 (2s interval), 0.5s delay
+    // For Horizontal V2 (1s interval), 0 delay (continuous linear motion)
+    // For Horizontal V3 (accelerating), 0 delay
+    let DELAY = 1.5;
+    if (targetScreen === "Vertical V2") DELAY = 0.5;
+    if (targetScreen === "Horizontal V2") DELAY = 0;
+    if (targetScreen === "Horizontal V3") DELAY = 0;
+
     let progress;
     
-    if (elapsed < DELAY) {
+    if (DELAY > 0 && elapsed < DELAY) {
       progress = 0; // Stay at start position
     } else {
-      const animDuration = Math.max(0.1, duration - DELAY);
-      progress = Math.min(1, (elapsed - DELAY) / animDuration);
+      const animDuration = Math.max(0.001, duration - DELAY); // Prevent division by zero
+      progress = Math.min(1, Math.max(0, (elapsed - DELAY) / animDuration));
     }
     
-    const easedProgress = THREE.MathUtils.smoothstep(progress, 0, 1); // Simple ease-in-out
+    const easedProgress = (targetScreen === "Horizontal V2" || targetScreen === "Horizontal V3") ? progress : THREE.MathUtils.smoothstep(progress, 0, 1); // Simple ease-in-out
 
     // Snappy CubeSize Transition (0.5s duration)
     // "찰지게 확 커지게" -> Use BackOut easing for a pop effect
@@ -972,39 +997,25 @@ function CameraHelper({ controlsRef, onUpdate, jumpTarget }) {
   return null;
 }
 
+// --- Screen Specs ---
+const SCREEN_SPECS = {
+  "L-shaped": { width: 1152, height: 1248 },
+  "Horizontal": { width: 1920, height: 1080 },
+  "Horizontal V2": { width: 1920, height: 1080 },
+  "Horizontal V3": { width: 1920, height: 1080 },
+  "Vertical": { width: 576, height: 1248 },
+  "Vertical V2": { width: 576, height: 1248 },
+  "Elevator": { width: 1248, height: 1456 }
+};
+
 export default function VisInteractive() {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [recordMode, setRecordMode] = useState(false);
   const [cameraState, setCameraState] = useState(null);
   
-  // Frame Recorder
+  // Frame Recorder state
   const [recordingTime, setRecordingTime] = useState(0);
-  
-  // Calculate total frames based on keyframes duration
-  const duration = keyframes[keyframes.length - 1].time;
-  const fps = 30;
-  const calculatedTotalFrames = Math.ceil(duration * fps);
-
-  const { 
-    isRecording: isFrameRecording, 
-    progress: frameProgress, 
-    currentFrame, 
-    totalFrames, 
-    startRecording: startFrameRecording, 
-    stopRecording: stopFrameRecording 
-  } = useFrameRecorder({
-    totalFrames: calculatedTotalFrames,
-    fps: fps,
-    onFrame: (t) => setRecordingTime(t),
-    onStart: () => {
-      // Stop regular animation loop
-      stopAnimation();
-    },
-    onStop: () => {
-      // Optional: Restart animation or stay paused
-    }
-  });
   
   // Animation State
   const [isAnimating, setIsAnimating] = useState(false);
@@ -1023,6 +1034,9 @@ export default function VisInteractive() {
   // We use set to programmatically update Leva controls
   // --- Leva Controls ---
   // We use set to programmatically update Leva controls
+  // --- Leva Controls ---
+  
+  // 1. Configuration Controls
   const [config, setConfig] = useControls(() => ({
     layout: { 
       options: [
@@ -1033,17 +1047,26 @@ export default function VisInteractive() {
       ], 
       value: 'Cube' 
     },
+    targetScreen: {
+      options: Object.keys(SCREEN_SPECS),
+      value: "L-shaped",
+      label: "Target Screen"
+    },
+    exportDPR: { value: 2, min: 1, max: 4, step: 0.1, label: "Export DPR" },
     N: { value: 24, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
     spacing: { value: 3, min: 0.1, max: 5.0, step: 0.1 },
     cubeSize: { value: 1.0, min: 0.1, max: 4.0, step: 0.1 },
-    startHour: { value: 12, min: 0, max: 24, step: 0.1, label: "Start Hour" }, // Changed to slider for fluid animation
-    
+    startHour: { value: 12, min: 0, max: 24, step: 0.1, label: "Start Hour" }, 
+  }));
+
+  // 2. Action Controls (Dependent on config)
+  useControls({
     "Test Animation": button(() => {
        startAnimation();
     }),
     
     "Jump to Keyframe": folder(
-      keyframes.reduce((acc, kf, idx) => {
+      (KEYFRAME_MAP[config.targetScreen] || KEYFRAME_MAP["L-shaped"]).reduce((acc, kf, idx) => {
         acc[`${kf.time}s (${kf.config.layout})`] = button(() => {
            // Stop animation if running
            stopAnimation();
@@ -1086,7 +1109,34 @@ export default function VisInteractive() {
       }, {}),
       { collapsed: true }
     )
-  }));
+  }, [config.targetScreen]); // Re-render actions when targetScreen changes
+
+  // Calculate total frames based on keyframes duration
+  // Use safe accessor for keyframes
+  const activeKeyframes = KEYFRAME_MAP[config?.targetScreen] || KEYFRAME_MAP["L-shaped"];
+  const duration = activeKeyframes[activeKeyframes.length - 1].time;
+  const fps = 30;
+  const calculatedTotalFrames = Math.ceil(duration * fps);
+
+  const { 
+    isRecording: isFrameRecording, 
+    progress: frameProgress, 
+    currentFrame, 
+    totalFrames, 
+    startRecording: startFrameRecording, 
+    stopRecording: stopFrameRecording 
+  } = useFrameRecorder({
+    totalFrames: calculatedTotalFrames,
+    fps: fps,
+    onFrame: (t) => setRecordingTime(t),
+    onStart: () => {
+      // Stop regular animation loop
+      stopAnimation();
+    },
+    onStop: () => {
+      // Optional: Restart animation or stay paused
+    }
+  });
 
   // Sync Leva config to Ref when NOT animating
   // This ensures sliders work immediately
@@ -1131,14 +1181,18 @@ export default function VisInteractive() {
   );
 
   const activeItem = hovered || selected;
+  
+  // Safe accessors
+  const targetSpec = SCREEN_SPECS[config.targetScreen] || SCREEN_SPECS["L-shaped"];
+  const dpr = config.exportDPR || 2;
 
   return (
     <Container>
       <Leva collapsed={false} /> 
       
       <div style={{
-        width: recordMode ? '1152px' : '100vw',
-        height: recordMode ? '1248px' : '100vh',
+        width: recordMode ? `${targetSpec.width}px` : '100vw',
+        height: recordMode ? `${targetSpec.height}px` : '100vh',
         // Center the wide container
         position: recordMode ? 'absolute' : 'relative',
         left: recordMode ? '50%' : 'auto',
@@ -1152,7 +1206,7 @@ export default function VisInteractive() {
         zIndex: 0 // Ensure it's behind overlay
       }}>
         <Canvas 
-          dpr={2} // Force high DPR for recording
+          dpr={dpr} // Use configurable DPR
           gl={{ preserveDrawingBuffer: true, logarithmicDepthBuffer: true }}
           onCreated={({ gl }) => {
             window._canvas = gl.domElement;
@@ -1171,6 +1225,7 @@ export default function VisInteractive() {
             animationConfigRef={animationConfigRef}
             isRecording={isFrameRecording}
             recordingTime={recordingTime}
+            targetScreen={config.targetScreen}
           />
           
           <CameraHelper controlsRef={controlsRef} onUpdate={setCameraState} jumpTarget={jumpTarget} />
@@ -1214,7 +1269,7 @@ export default function VisInteractive() {
             }}
             style={{ padding: '8px', cursor: 'pointer' }}
           >
-            {recordMode ? "Exit Record Mode" : "Enter Record Mode (1152x1248)"}
+            {recordMode ? "Exit Record Mode" : `Enter Record Mode (${targetSpec.width}x${targetSpec.height})`}
           </button>
           
           {recordMode && (
@@ -1240,9 +1295,13 @@ export default function VisInteractive() {
                 onClick={() => {
                   if (isFrameRecording) stopFrameRecording();
                   else {
+                    // Get duration from current keyframes
+                    const currentKeyframes = KEYFRAME_MAP[config.targetScreen] || KEYFRAME_MAP["L-shaped"];
+                    const duration = currentKeyframes[currentKeyframes.length - 1].time;
+                    
                     const now = new Date();
                     const timestamp = now.toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/:/g, '-');
-                    const seqName = `shibuya_render_${timestamp}`;
+                    const seqName = `shibuya_${config.targetScreen}_${timestamp}`;
                     startFrameRecording(window._canvas, seqName);
                   }
                 }}

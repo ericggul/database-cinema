@@ -1,0 +1,2224 @@
+[
+    {
+        "time": 1,
+        "camera": {
+            "spherical": {
+                "radius": 78.84393386404038,
+                "theta": 45,
+                "phi": 48.46181500732207
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 4.067775123514894,
+            "cubeSize": 1.6559170623674435,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 1,
+        "camera": {
+            "spherical": {
+                "radius": 78.84393386404038,
+                "theta": 45,
+                "phi": 48.46181500732207
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 4.067775123514894,
+            "cubeSize": 1.6559170623674435,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 2,
+        "camera": {
+            "spherical": {
+                "radius": 160.8839092237539,
+                "theta": 90,
+                "phi": 61.30656725100724
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 3.676167043696745,
+            "cubeSize": 1.5152619797293922,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 3,
+        "camera": {
+            "spherical": {
+                "radius": 87.54707300058729,
+                "theta": 135,
+                "phi": 56.85429364727841
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 3.8742438090147866,
+            "cubeSize": 1.1541984300069656,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 4,
+        "camera": {
+            "spherical": {
+                "radius": 173.76205028300302,
+                "theta": 180,
+                "phi": 68.46685011555664
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 4.280799753123043,
+            "cubeSize": 1.4263283289067101,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 5,
+        "camera": {
+            "spherical": {
+                "radius": 79.64537729360008,
+                "theta": 225,
+                "phi": 86.62358653395967
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 4.340378096260855,
+            "cubeSize": 1.4869453037337976,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 6,
+        "camera": {
+            "spherical": {
+                "radius": 172.45199628599786,
+                "theta": 270,
+                "phi": 79.3297492125822
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.7142871246702933,
+            "cubeSize": 1.9259295549928444,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 7,
+        "camera": {
+            "spherical": {
+                "radius": 77.79439782701834,
+                "theta": 315,
+                "phi": 45.51807702962308
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 4.300229498229328,
+            "cubeSize": 1.7757908208316313,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 7.5,
+        "camera": {
+            "spherical": {
+                "radius": 181.77355529916073,
+                "theta": 0,
+                "phi": 49.31517114970687
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 3.5416861391931667,
+            "cubeSize": 1.6377479463572235,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 8,
+        "camera": {
+            "spherical": {
+                "radius": 75.83986852654797,
+                "theta": 45,
+                "phi": 77.02686538504278
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 4.098662028567711,
+            "cubeSize": 1.772076115690467,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 8.5,
+        "camera": {
+            "spherical": {
+                "radius": 197.00836509913722,
+                "theta": 90,
+                "phi": 53.47536103587535
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Elliptic Cylinder",
+            "N": 24,
+            "spacing": 4.130430583506265,
+            "cubeSize": 1.8668583894461104,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 9,
+        "camera": {
+            "spherical": {
+                "radius": 79.58681289028397,
+                "theta": 135,
+                "phi": 64.67638818664417
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Prolate Spheroidal",
+            "N": 24,
+            "spacing": 3.6812227973676555,
+            "cubeSize": 1.2466762583159092,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 9.5,
+        "camera": {
+            "spherical": {
+                "radius": 167.4096834321051,
+                "theta": 180,
+                "phi": 50.23479188268679
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Paraboloidal",
+            "N": 24,
+            "spacing": 3.5330603213449026,
+            "cubeSize": 1.437943017134337,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 10,
+        "camera": {
+            "spherical": {
+                "radius": 97.75480001332747,
+                "theta": 225,
+                "phi": 74.90945208964564
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Ellipsoidal",
+            "N": 24,
+            "spacing": 4.196815243008315,
+            "cubeSize": 1.7433254414143897,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 10.5,
+        "camera": {
+            "spherical": {
+                "radius": 166.2704045332432,
+                "theta": 270,
+                "phi": 45.65220440291906
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 3.794052183435282,
+            "cubeSize": 1.2984650264832713,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 11,
+        "camera": {
+            "spherical": {
+                "radius": 86.46714882457182,
+                "theta": 315,
+                "phi": 58.81024019418483
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 4.383774287512113,
+            "cubeSize": 1.6997165909581058,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 11.5,
+        "camera": {
+            "spherical": {
+                "radius": 178.73994652545463,
+                "theta": 0,
+                "phi": 60.145305722692065
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 3.6932109751452598,
+            "cubeSize": 1.0794989178116128,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 12,
+        "camera": {
+            "spherical": {
+                "radius": 81.43362856572712,
+                "theta": 45,
+                "phi": 77.19714758263967
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 4.302455195487631,
+            "cubeSize": 1.2252974858049483,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 12.5,
+        "camera": {
+            "spherical": {
+                "radius": 195.455265457949,
+                "theta": 90,
+                "phi": 65.93462689670417
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 4.288951001989311,
+            "cubeSize": 1.0555293872143052,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 13,
+        "camera": {
+            "spherical": {
+                "radius": 75.68211663095464,
+                "theta": 135,
+                "phi": 58.41218099132238
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.7195520801712156,
+            "cubeSize": 1.6152957659024925,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 13.25,
+        "camera": {
+            "spherical": {
+                "radius": 185.66431525983194,
+                "theta": 180,
+                "phi": 60.12371045539094
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 4.3929636663847536,
+            "cubeSize": 1.35502038591054,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 13.5,
+        "camera": {
+            "spherical": {
+                "radius": 76.46944357048747,
+                "theta": 225,
+                "phi": 56.02000742747202
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 4.156992411709528,
+            "cubeSize": 1.4189907989778017,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 13.75,
+        "camera": {
+            "spherical": {
+                "radius": 174.82583816284037,
+                "theta": 270,
+                "phi": 41.65567542084326
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 4.30887742039746,
+            "cubeSize": 1.9922738342674842,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 14,
+        "camera": {
+            "spherical": {
+                "radius": 76.4863539623127,
+                "theta": 315,
+                "phi": 49.65792518533745
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Elliptic Cylinder",
+            "N": 24,
+            "spacing": 4.396848903846355,
+            "cubeSize": 1.2998783104732132,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 14.25,
+        "camera": {
+            "spherical": {
+                "radius": 169.50576583893832,
+                "theta": 0,
+                "phi": 51.69719872860516
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Prolate Spheroidal",
+            "N": 24,
+            "spacing": 4.444584007792839,
+            "cubeSize": 1.6610995992345365,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 14.5,
+        "camera": {
+            "spherical": {
+                "radius": 86.127735918099,
+                "theta": 45,
+                "phi": 52.833204145766004
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Paraboloidal",
+            "N": 24,
+            "spacing": 4.088718696783075,
+            "cubeSize": 1.0373391949353588,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 14.75,
+        "camera": {
+            "spherical": {
+                "radius": 167.02411986518825,
+                "theta": 90,
+                "phi": 54.35610309668813
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Ellipsoidal",
+            "N": 24,
+            "spacing": 4.310053189363446,
+            "cubeSize": 1.9898982624122974,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 15,
+        "camera": {
+            "spherical": {
+                "radius": 74.31476982642522,
+                "theta": 135,
+                "phi": 55.03973353471477
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 4.173466059250718,
+            "cubeSize": 1.6268838947064717,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 15.25,
+        "camera": {
+            "spherical": {
+                "radius": 182.46422059530806,
+                "theta": 180,
+                "phi": 59.57723078105748
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 3.8493398067494486,
+            "cubeSize": 1.610383466381052,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 15.5,
+        "camera": {
+            "spherical": {
+                "radius": 91.1432365502821,
+                "theta": 225,
+                "phi": 46.29891772823879
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 3.9415252083772794,
+            "cubeSize": 1.6869487755978028,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 15.75,
+        "camera": {
+            "spherical": {
+                "radius": 163.08958912453843,
+                "theta": 270,
+                "phi": 68.79866472035467
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 4.029192928134703,
+            "cubeSize": 1.2591407701198338,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 16,
+        "camera": {
+            "spherical": {
+                "radius": 76.64812323055241,
+                "theta": 315,
+                "phi": 72.3559276590194
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 4.02625097132597,
+            "cubeSize": 1.6252120151695602,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 16.25,
+        "camera": {
+            "spherical": {
+                "radius": 176.15001790160645,
+                "theta": 0,
+                "phi": 66.24592672974384
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.549297085795762,
+            "cubeSize": 1.3359151924987083,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 16.5,
+        "camera": {
+            "spherical": {
+                "radius": 88.88536204043757,
+                "theta": 45,
+                "phi": 53.94701422412986
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 3.7457400377164736,
+            "cubeSize": 1.9012566354223077,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 16.75,
+        "camera": {
+            "spherical": {
+                "radius": 191.6630510046351,
+                "theta": 90,
+                "phi": 62.49086124896337
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 3.8412208477273397,
+            "cubeSize": 1.4374878758137715,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 17,
+        "camera": {
+            "spherical": {
+                "radius": 89.9249454956389,
+                "theta": 135,
+                "phi": 58.624827885837306
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 3.757508838871628,
+            "cubeSize": 1.247643128885921,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 17.25,
+        "camera": {
+            "spherical": {
+                "radius": 183.98349717194935,
+                "theta": 180,
+                "phi": 65.75835674021253
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Elliptic Cylinder",
+            "N": 24,
+            "spacing": 3.754325074849578,
+            "cubeSize": 1.2530632625315303,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 17.5,
+        "camera": {
+            "spherical": {
+                "radius": 85.0961786649163,
+                "theta": 225,
+                "phi": 60.8926896305277
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Prolate Spheroidal",
+            "N": 24,
+            "spacing": 4.151930129532031,
+            "cubeSize": 1.362001605653566,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 17.75,
+        "camera": {
+            "spherical": {
+                "radius": 178.95581966451957,
+                "theta": 270,
+                "phi": 59.78629382095258
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Paraboloidal",
+            "N": 24,
+            "spacing": 4.181653940409298,
+            "cubeSize": 1.3781777225061764,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 18,
+        "camera": {
+            "spherical": {
+                "radius": 98.92937023966627,
+                "theta": 315,
+                "phi": 82.42754166985154
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Ellipsoidal",
+            "N": 24,
+            "spacing": 3.5843442950573303,
+            "cubeSize": 1.1920590389192345,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 18.25,
+        "camera": {
+            "spherical": {
+                "radius": 164.24802421728305,
+                "theta": 0,
+                "phi": 62.56458014044121
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 4.440689634751974,
+            "cubeSize": 1.2843415493190058,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 18.5,
+        "camera": {
+            "spherical": {
+                "radius": 78.12629934305163,
+                "theta": 45,
+                "phi": 52.13984609833247
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 3.5667601127221857,
+            "cubeSize": 1.323595701673169,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 18.75,
+        "camera": {
+            "spherical": {
+                "radius": 195.29755417546556,
+                "theta": 90,
+                "phi": 83.22033781729245
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 4.356797445553271,
+            "cubeSize": 1.0082209128960793,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19,
+        "camera": {
+            "spherical": {
+                "radius": 72.80168822008939,
+                "theta": 135,
+                "phi": 85.74639200674062
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 4.312455200673375,
+            "cubeSize": 1.978807910968619,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19.125,
+        "camera": {
+            "spherical": {
+                "radius": 184.94932015912866,
+                "theta": 180,
+                "phi": 47.60298529226049
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 3.6651173322550816,
+            "cubeSize": 1.274829303357275,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19.25,
+        "camera": {
+            "spherical": {
+                "radius": 96.84645009740991,
+                "theta": 225,
+                "phi": 51.68073770856962
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.819977469368939,
+            "cubeSize": 1.8368432205739418,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19.375,
+        "camera": {
+            "spherical": {
+                "radius": 180.17265332484035,
+                "theta": 270,
+                "phi": 59.223613787957085
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 3.9864670783268608,
+            "cubeSize": 1.5580962375874428,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19.5,
+        "camera": {
+            "spherical": {
+                "radius": 77.26131490842303,
+                "theta": 315,
+                "phi": 46.92050196880629
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 4.193073593060096,
+            "cubeSize": 1.393361206487574,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19.625,
+        "camera": {
+            "spherical": {
+                "radius": 187.31600649096964,
+                "theta": 0,
+                "phi": 82.32138027919723
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 4.017661565435884,
+            "cubeSize": 1.5032143429716929,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19.75,
+        "camera": {
+            "spherical": {
+                "radius": 75.46977937661097,
+                "theta": 45,
+                "phi": 47.114067908204824
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Elliptic Cylinder",
+            "N": 24,
+            "spacing": 3.716863064685102,
+            "cubeSize": 1.078298453189835,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 19.875,
+        "camera": {
+            "spherical": {
+                "radius": 180.93133759648452,
+                "theta": 90,
+                "phi": 76.84928522760976
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Prolate Spheroidal",
+            "N": 24,
+            "spacing": 3.660258419972377,
+            "cubeSize": 1.0359940066028315,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20,
+        "camera": {
+            "spherical": {
+                "radius": 92.02475407751298,
+                "theta": 135,
+                "phi": 54.7503553252039
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Paraboloidal",
+            "N": 24,
+            "spacing": 3.648216585406141,
+            "cubeSize": 1.149819288487677,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20.125,
+        "camera": {
+            "spherical": {
+                "radius": 167.43495069898208,
+                "theta": 180,
+                "phi": 88.91018242673644
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Ellipsoidal",
+            "N": 24,
+            "spacing": 4.342596531981851,
+            "cubeSize": 1.3310618964597707,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20.25,
+        "camera": {
+            "spherical": {
+                "radius": 94.14377320718054,
+                "theta": 225,
+                "phi": 42.54744644736606
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 4.389537230462867,
+            "cubeSize": 1.3690344918490454,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20.375,
+        "camera": {
+            "spherical": {
+                "radius": 184.6710449484026,
+                "theta": 270,
+                "phi": 61.417180780149735
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 3.9531487842378974,
+            "cubeSize": 1.131593968759794,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20.5,
+        "camera": {
+            "spherical": {
+                "radius": 89.25146202507426,
+                "theta": 315,
+                "phi": 40.15092802229911
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 4.344842015193338,
+            "cubeSize": 1.521382852449216,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20.625,
+        "camera": {
+            "spherical": {
+                "radius": 183.38127509902034,
+                "theta": 0,
+                "phi": 80.25279802177296
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 3.8816803964112387,
+            "cubeSize": 1.105220283036114,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20.75,
+        "camera": {
+            "spherical": {
+                "radius": 88.15717416350071,
+                "theta": 45,
+                "phi": 86.14259852960541
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 4.140581468727616,
+            "cubeSize": 1.0977883742701533,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 20.875,
+        "camera": {
+            "spherical": {
+                "radius": 184.2621523458218,
+                "theta": 90,
+                "phi": 58.32508369379593
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.85842604811067,
+            "cubeSize": 1.6139618881249664,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21,
+        "camera": {
+            "spherical": {
+                "radius": 96.25163847951464,
+                "theta": 135,
+                "phi": 67.05368976285109
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 3.8897167487377033,
+            "cubeSize": 1.2812493661043909,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21.125,
+        "camera": {
+            "spherical": {
+                "radius": 192.1472640619,
+                "theta": 180,
+                "phi": 65.88919435628424
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 3.973257564044865,
+            "cubeSize": 1.6965498104609378,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21.25,
+        "camera": {
+            "spherical": {
+                "radius": 85.2055297798637,
+                "theta": 225,
+                "phi": 71.95328451767976
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 3.711348304648358,
+            "cubeSize": 1.0475115299539008,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21.375,
+        "camera": {
+            "spherical": {
+                "radius": 172.80067644779785,
+                "theta": 270,
+                "phi": 66.67871018324232
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Elliptic Cylinder",
+            "N": 24,
+            "spacing": 4.171621376000964,
+            "cubeSize": 1.2615079141779553,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21.5,
+        "camera": {
+            "spherical": {
+                "radius": 94.90183319975658,
+                "theta": 315,
+                "phi": 60.664787275129086
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Prolate Spheroidal",
+            "N": 24,
+            "spacing": 3.9219516300182056,
+            "cubeSize": 1.1901558886287857,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21.625,
+        "camera": {
+            "spherical": {
+                "radius": 175.6245703339552,
+                "theta": 0,
+                "phi": 69.31404173893219
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Paraboloidal",
+            "N": 24,
+            "spacing": 4.370465775601428,
+            "cubeSize": 1.5479494056309429,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21.75,
+        "camera": {
+            "spherical": {
+                "radius": 83.87539676811846,
+                "theta": 45,
+                "phi": 77.76570101009139
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Ellipsoidal",
+            "N": 24,
+            "spacing": 3.6557349641323262,
+            "cubeSize": 1.904144168816743,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21.875,
+        "camera": {
+            "spherical": {
+                "radius": 163.2971946465656,
+                "theta": 90,
+                "phi": 63.75675169295573
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 3.755332848939621,
+            "cubeSize": 1.6610713683856488,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22,
+        "camera": {
+            "spherical": {
+                "radius": 91.4190353261304,
+                "theta": 135,
+                "phi": 84.75683557927955
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 4.345144336916729,
+            "cubeSize": 1.3499886267309806,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22.125,
+        "camera": {
+            "spherical": {
+                "radius": 161.20948565180814,
+                "theta": 180,
+                "phi": 54.710808299848196
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 4.360288568233318,
+            "cubeSize": 1.2597390213415247,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22.25,
+        "camera": {
+            "spherical": {
+                "radius": 93.21331862816345,
+                "theta": 225,
+                "phi": 74.54249027889185
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 3.9057993968882534,
+            "cubeSize": 1.0631661150004863,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22.375,
+        "camera": {
+            "spherical": {
+                "radius": 170.2557001713342,
+                "theta": 270,
+                "phi": 51.08876711943903
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 4.064898480649672,
+            "cubeSize": 1.8165705768951452,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22.5,
+        "camera": {
+            "spherical": {
+                "radius": 75.02749116313404,
+                "theta": 315,
+                "phi": 89.36974065293848
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.5044117975086975,
+            "cubeSize": 1.7578003686421877,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22.625,
+        "camera": {
+            "spherical": {
+                "radius": 193.1373027859347,
+                "theta": 0,
+                "phi": 77.31968800937003
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 4.168256253042978,
+            "cubeSize": 1.6766594318778056,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22.75,
+        "camera": {
+            "spherical": {
+                "radius": 94.21570104397752,
+                "theta": 45,
+                "phi": 83.48171793953043
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 3.533986103122536,
+            "cubeSize": 1.6311377843401165,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 22.875,
+        "camera": {
+            "spherical": {
+                "radius": 180.97410289765384,
+                "theta": 90,
+                "phi": 77.81292378443572
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 3.5120060763786753,
+            "cubeSize": 1.5100833476103652,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23,
+        "camera": {
+            "spherical": {
+                "radius": 91.91019737316948,
+                "theta": 135,
+                "phi": 70.85404424002846
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Elliptic Cylinder",
+            "N": 24,
+            "spacing": 3.9957477272979256,
+            "cubeSize": 1.8272418011151645,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23.125,
+        "camera": {
+            "spherical": {
+                "radius": 170.0362964920662,
+                "theta": 180,
+                "phi": 75.44752687456881
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Prolate Spheroidal",
+            "N": 24,
+            "spacing": 3.5237464845758595,
+            "cubeSize": 1.9351995419721293,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23.25,
+        "camera": {
+            "spherical": {
+                "radius": 88.17255776055245,
+                "theta": 225,
+                "phi": 67.90938603274486
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Paraboloidal",
+            "N": 24,
+            "spacing": 4.240721423368176,
+            "cubeSize": 1.4377216414797522,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23.375,
+        "camera": {
+            "spherical": {
+                "radius": 196.13967975327208,
+                "theta": 270,
+                "phi": 54.88279019164585
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Ellipsoidal",
+            "N": 24,
+            "spacing": 3.9204505387944817,
+            "cubeSize": 1.7318809762601919,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23.5,
+        "camera": {
+            "spherical": {
+                "radius": 92.97533064528368,
+                "theta": 315,
+                "phi": 50.49579556419008
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 3.973286692333698,
+            "cubeSize": 1.0792349990747807,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23.625,
+        "camera": {
+            "spherical": {
+                "radius": 179.6873377785799,
+                "theta": 0,
+                "phi": 76.79816732067538
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 3.5122953367864125,
+            "cubeSize": 1.2985916078286106,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23.75,
+        "camera": {
+            "spherical": {
+                "radius": 90.36033351310425,
+                "theta": 45,
+                "phi": 65.24351703349984
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 4.295198905777942,
+            "cubeSize": 1.2157714951642942,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 23.875,
+        "camera": {
+            "spherical": {
+                "radius": 176.55836860355925,
+                "theta": 90,
+                "phi": 87.2521643892392
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 4.218591354734074,
+            "cubeSize": 1.2076366484330858,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24,
+        "camera": {
+            "spherical": {
+                "radius": 83.8535557626516,
+                "theta": 135,
+                "phi": 86.62657784450764
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 4.298431674447147,
+            "cubeSize": 1.0940680777579164,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24.125,
+        "camera": {
+            "spherical": {
+                "radius": 164.9503269020475,
+                "theta": 180,
+                "phi": 41.915830710399334
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.748652835271506,
+            "cubeSize": 1.081443683567707,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24.25,
+        "camera": {
+            "spherical": {
+                "radius": 81.53594953552596,
+                "theta": 225,
+                "phi": 63.26614264661998
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 3.817346247062891,
+            "cubeSize": 1.0086275507192521,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24.375,
+        "camera": {
+            "spherical": {
+                "radius": 175.37215324885582,
+                "theta": 270,
+                "phi": 82.30172468244909
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 3.6799356438643076,
+            "cubeSize": 1.3837666012023548,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24.5,
+        "camera": {
+            "spherical": {
+                "radius": 83.88622603816056,
+                "theta": 315,
+                "phi": 55.20529597996891
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 4.167650409647082,
+            "cubeSize": 1.4627674302416764,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24.625,
+        "camera": {
+            "spherical": {
+                "radius": 192.20788513759726,
+                "theta": 0,
+                "phi": 42.520672713689876
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Elliptic Cylinder",
+            "N": 24,
+            "spacing": 3.532022570704184,
+            "cubeSize": 1.206509016469688,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24.75,
+        "camera": {
+            "spherical": {
+                "radius": 95.05964604982246,
+                "theta": 45,
+                "phi": 60.77845063546848
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Prolate Spheroidal",
+            "N": 24,
+            "spacing": 3.7311348340570163,
+            "cubeSize": 1.750814624822564,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 24.875,
+        "camera": {
+            "spherical": {
+                "radius": 174.46626021608517,
+                "theta": 90,
+                "phi": 47.91738452770163
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Paraboloidal",
+            "N": 24,
+            "spacing": 3.8718002043652464,
+            "cubeSize": 1.106958559144318,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25,
+        "camera": {
+            "spherical": {
+                "radius": 94.28399996084275,
+                "theta": 135,
+                "phi": 76.46982570365049
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Ellipsoidal",
+            "N": 24,
+            "spacing": 4.169280394368347,
+            "cubeSize": 1.8012362555338512,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25.125,
+        "camera": {
+            "spherical": {
+                "radius": 194.1363512760223,
+                "theta": 180,
+                "phi": 78.45564619420574
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 4.363350363260694,
+            "cubeSize": 1.622457805427046,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25.25,
+        "camera": {
+            "spherical": {
+                "radius": 80.67073976610125,
+                "theta": 225,
+                "phi": 55.63982116685884
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cylinder",
+            "N": 24,
+            "spacing": 3.807195338292587,
+            "cubeSize": 1.6675578003381126,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25.375,
+        "camera": {
+            "spherical": {
+                "radius": 199.37586829534376,
+                "theta": 270,
+                "phi": 43.822524972754806
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Oblate Spheroidal",
+            "N": 24,
+            "spacing": 3.732209066338931,
+            "cubeSize": 1.7808350245551772,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25.5,
+        "camera": {
+            "spherical": {
+                "radius": 89.32799582093666,
+                "theta": 315,
+                "phi": 48.53095223791709
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 3.920882689296649,
+            "cubeSize": 1.9227776136981451,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25.625,
+        "camera": {
+            "spherical": {
+                "radius": 192.4159556072799,
+                "theta": 0,
+                "phi": 59.89657658342807
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 3.6536570256555345,
+            "cubeSize": 1.3345580208942864,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25.75,
+        "camera": {
+            "spherical": {
+                "radius": 83.6155868534852,
+                "theta": 45,
+                "phi": 81.66970226974166
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.5399884783146565,
+            "cubeSize": 1.8343190005696293,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 25.875,
+        "camera": {
+            "spherical": {
+                "radius": 186.9345829595614,
+                "theta": 90,
+                "phi": 52.51728073429288
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 3.627787566165133,
+            "cubeSize": 1.7092406550381305,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 26,
+        "camera": {
+            "spherical": {
+                "radius": 170.675829974164,
+                "theta": 135,
+                "phi": 58.916681807018364
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 3.6763792083040467,
+            "cubeSize": 1.7113100271181323,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 27,
+        "camera": {
+            "spherical": {
+                "radius": 180.38152264998712,
+                "theta": 135,
+                "phi": 76.57757973265447
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Helix",
+            "N": 24,
+            "spacing": 4.4228337803090785,
+            "cubeSize": 1.5111983817294898,
+            "startHour": 12
+        }
+    }
+]
