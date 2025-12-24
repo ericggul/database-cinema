@@ -1,0 +1,112 @@
+[
+    {
+        "time": 0,
+        "camera": {
+            "spherical": {
+                "radius": 80,
+                "theta": 45,
+                "phi": 60
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Cube",
+            "N": 24,
+            "spacing": 3.0,
+            "cubeSize": 1.0,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 7,
+        "camera": {
+            "spherical": {
+                "radius": 120,
+                "theta": 135,
+                "phi": 45
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Scatter",
+            "N": 24,
+            "spacing": 4.0,
+            "cubeSize": 0.8,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 14,
+        "camera": {
+            "spherical": {
+                "radius": 100,
+                "theta": 225,
+                "phi": 80
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Conical",
+            "N": 24,
+            "spacing": 3.5,
+            "cubeSize": 1.2,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 21,
+        "camera": {
+            "spherical": {
+                "radius": 140,
+                "theta": 315,
+                "phi": 30
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 3.0,
+            "cubeSize": 1.0,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 27,
+        "camera": {
+            "spherical": {
+                "radius": 150,
+                "theta": 360,
+                "phi": 45
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 3.0,
+            "cubeSize": 1.0,
+            "startHour": 12
+        }
+    }
+]

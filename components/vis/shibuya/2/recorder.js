@@ -72,6 +72,7 @@ export function useFrameRecorder({
               try {
                 // Wait for upload to finish before moving to next frame
                 await uploadFrame(blob, frame);
+                console.log(`Frame ${frame} saved`);
                 
                 // 4. Next Frame
                 frameRef.current++;
@@ -82,6 +83,7 @@ export function useFrameRecorder({
                 processFrame();
               } catch (err) {
                 console.error("Frame processing error", err);
+                alert(`Recording failed at frame ${frame}: ${err.message}`);
                 stopRecording();
               }
             } else {

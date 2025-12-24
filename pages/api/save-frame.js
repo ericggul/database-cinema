@@ -4,7 +4,7 @@ import path from 'path';
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb', // Adjust if needed for 4K images
+      sizeLimit: '50mb', // Increased for HQ images
     },
   },
 };

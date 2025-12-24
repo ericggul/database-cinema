@@ -634,7 +634,7 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
   );
 }
 
-import keyframes from "./keyframes4.json";
+import keyframes from "./keyframes_final.json";
 
 // --- Animation Controller ---
 function AnimationController({ isPlaying, time, setConfig, setCamera, animationConfigRef, isRecording, recordingTime }) {
@@ -985,6 +985,12 @@ export default function VisInteractive() {
   
   // Frame Recorder
   const [recordingTime, setRecordingTime] = useState(0);
+  
+  // Calculate total frames based on keyframes duration
+  const duration = keyframes[keyframes.length - 1].time;
+  const fps = 30;
+  const calculatedTotalFrames = Math.ceil(duration * fps);
+
   const { 
     isRecording: isFrameRecording, 
     progress: frameProgress, 
@@ -993,8 +999,8 @@ export default function VisInteractive() {
     startRecording: startFrameRecording, 
     stopRecording: stopFrameRecording 
   } = useFrameRecorder({
-    totalFrames: 1800, // 60s @ 30fps
-    fps: 30,
+    totalFrames: calculatedTotalFrames,
+    fps: fps,
     onFrame: (t) => setRecordingTime(t),
     onStart: () => {
       // Stop regular animation loop
@@ -1015,6 +1021,8 @@ export default function VisInteractive() {
   const animationConfigRef = useRef({ spacing: 3.0, cubeSize: 1.0 });
   
   const controlsRef = useRef();
+
+
 
   // --- Leva Controls ---
   // We use set to programmatically update Leva controls
@@ -1084,6 +1092,15 @@ export default function VisInteractive() {
       { collapsed: true }
     )
   }));
+
+  // Sync Leva config to Ref when NOT animating
+  // This ensures sliders work immediately
+  useEffect(() => {
+    if (!isAnimating && !isFrameRecording) {
+      animationConfigRef.current.spacing = config.spacing;
+      animationConfigRef.current.cubeSize = config.cubeSize;
+    }
+  }, [config.spacing, config.cubeSize, isAnimating, isFrameRecording]);
 
   const [jumpTarget, setJumpTarget] = useState(null);
 
