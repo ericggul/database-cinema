@@ -40,19 +40,19 @@ const LAYOUT_PRESETS = [
   { name: "Bispherical", spacing: 2.8, cubeSize: 2.0 },
 ];
 
-const LAYOUT_NAMES_KR = {
-  "Cube": "직교좌표계",
-  "Sphere": "구면좌표계",
-  "Cylinder": "원통좌표계",
-  "Helix": "나선좌표계",
-  "Elliptic Cylinder": "타원원통좌표계",
-  "Parabolic Cylinder": "포물선원통좌표계",
-  "Conical": "원뿔좌표계",
-  "Oblate Spheroidal": "편구면좌표계",
-  "Prolate Spheroidal": "장구면좌표계",
-  "Ellipsoidal": "타원면좌표계",
-  "Paraboloidal": "포물면좌표계",
-  "Bispherical": "쌍구면좌표계",
+const LAYOUT_NAMES_JP = {
+  "Cube": "直交座標系",
+  "Sphere": "球面座標系",
+  "Cylinder": "円筒座標系",
+  "Helix": "螺旋座標系",
+  "Elliptic Cylinder": "楕円円筒座標系",
+  "Parabolic Cylinder": "放物線円筒座標系",
+  "Conical": "円錐座標系",
+  "Oblate Spheroidal": "扁平回転楕円面座標系",
+  "Prolate Spheroidal": "長回転楕円面座標系",
+  "Ellipsoidal": "楕円面座標系",
+  "Paraboloidal": "放物面座標系",
+  "Bispherical": "双球座標系",
 };
 
 const MAX_N = 24;
@@ -676,7 +676,7 @@ function GyroOrbitControls({ controlsRef, enabled, isCameraAnimating }) {
 
 export default function ShibuyaVisualization() {
   const [layoutIndex, setLayoutIndex] = useState(0);
-  const [isKorean, setIsKorean] = useState(false);
+  const [isJapanese, setIsJapanese] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [useGyro, setUseGyro] = useState(false);
@@ -689,8 +689,8 @@ export default function ShibuyaVisualization() {
   // Detect browser language on mount
   useEffect(() => {
     const lang = navigator.language || navigator.userLanguage;
-    if (lang && lang.startsWith('ko')) {
-      setIsKorean(true);
+    if (lang && (lang.startsWith('ja') || lang.startsWith('jp'))) {
+      setIsJapanese(true);
     }
   }, []);
   
@@ -758,17 +758,23 @@ export default function ShibuyaVisualization() {
       setSelectedInstanceId(null);
   };
 
+  const currentLayout = LAYOUT_PRESETS[layoutIndex];
+  const displayName = isJapanese ? (LAYOUT_NAMES_JP[currentLayout.name] || currentLayout.name) : currentLayout.name;
+  const subName = isJapanese ? currentLayout.name : (LAYOUT_NAMES_JP[currentLayout.name] || "");
+
   return (
     <S.Container onClick={handleBackgroundClick}>
       <S.LoadingOverlay $visible={loading} />
       
-      <S.LanguageToggle onClick={() => setIsKorean(!isKorean)}>
-        {isKorean ? "ENG" : "KOR"}
+      <S.LanguageToggle onClick={() => setIsJapanese(!isJapanese)}>
+        {isJapanese ? "EN" : "JP"}
       </S.LanguageToggle>
 
       {selectedInfo && (
           <S.SelectionInfo>
-              <S.SelectionTitle>Selected</S.SelectionTitle>
+              <S.SelectionTitle>
+                  {isJapanese ? "選択された記録" : "Selected Record"}
+              </S.SelectionTitle>
               <S.SelectionDetail>
                   {selectedInfo.month} <span>{selectedInfo.hour}</span>
               </S.SelectionDetail>
@@ -793,6 +799,10 @@ export default function ShibuyaVisualization() {
             dampingFactor={0.05}
             rotateSpeed={0.5}
             enableZoom={true}
+            minDistance={1.0} 
+            maxDistance={300}
+            autoRotate={!useGyro}
+            autoRotateSpeed={0.5}
         />
         
         <CameraAnimator 
@@ -811,33 +821,28 @@ export default function ShibuyaVisualization() {
       <S.UIOverlay>
         <S.BottomControls>
           <S.LayoutSelector>
-            <S.ControlGroup>
-                <S.ArrowButton onClick={(e) => { e.stopPropagation(); handlePrev(); }}>
-                ←
-                </S.ArrowButton>
-                <S.LayoutInfo>
-                <S.LayoutName>
-                    {isKorean ? LAYOUT_NAMES_KR[LAYOUT_PRESETS[layoutIndex].name] : LAYOUT_PRESETS[layoutIndex].name}
-                </S.LayoutName>
-                <S.LayoutSub>
-                    {isKorean ? "좌표계 시각화" : "Coordinate System Visualization"}
-                </S.LayoutSub>
-                </S.LayoutInfo>
-                <S.ArrowButton onClick={(e) => { e.stopPropagation(); handleNext(); }}>
-                →
-                </S.ArrowButton>
-            </S.ControlGroup>
-            
-            <S.ControlGroup>
-                <S.ShakeButton onClick={(e) => { e.stopPropagation(); handleGyroToggle(); }} style={{ color: useGyro ? '#4ade80' : 'rgba(255,255,255,0.8)' }}>
-                    <svg viewBox="0 0 24 24">
-                        <path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v16h10V4H7zm3 17h4v-1h-4v1z"/>
-                    </svg>
-                </S.ShakeButton>
-                <S.InfoIcon onClick={(e) => { e.stopPropagation(); setShowInfo(true); }}>
+            <S.InfoIcon onClick={(e) => { e.stopPropagation(); setShowInfo(true); }}>
                 i
-                </S.InfoIcon>
-            </S.ControlGroup>
+            </S.InfoIcon>
+            
+            <S.ArrowButton onClick={(e) => { e.stopPropagation(); handlePrev(); }}>
+            ←
+            </S.ArrowButton>
+            
+            <S.LayoutInfo>
+                <S.LayoutName>{displayName}</S.LayoutName>
+                {subName && <S.LayoutSub>{subName}</S.LayoutSub>}
+            </S.LayoutInfo>
+            
+            <S.ArrowButton onClick={(e) => { e.stopPropagation(); handleNext(); }}>
+            →
+            </S.ArrowButton>
+            
+            <S.ShakeButton onClick={(e) => { e.stopPropagation(); handleGyroToggle(); }} style={{ color: useGyro ? '#4ade80' : 'rgba(255,255,255,0.8)' }}>
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14zm-4.2-5.78v1.75l3.2-1.79c.05-.03.09-.07.12-.12.03-.04.05-.09.05-.15 0-.1-.05-.2-.13-.26l-3.24-2.16v1.75c-3.09-.46-4.63-2.79-4.63-2.79 1.1 3.72 4.63 3.77 4.63 3.77z"/>
+                </svg>
+            </S.ShakeButton>
           </S.LayoutSelector>
         </S.BottomControls>
       </S.UIOverlay>
@@ -853,24 +858,73 @@ export default function ShibuyaVisualization() {
             </S.ModalTitle>
             
             <S.ModalContent>
-              <p>
-                <strong>A Web Art On Generative Topological Navigation Study Of Coordinate Systems</strong><br/>
-                Cubic, Spherical, Cylindrical, Helical, Elliptic Cylindrical, Parabolic Cylindrical, Conical, Oblate Spheroidal, Prolate Spheroidal, Ellipsoidal, Paraboloidal, Bispherical.
-              </p>
-              <p>
-                Defining New Database Cinema Grammar Using Generative AI Via 144 Tokyo Shibuya Miyashita Park Sky Images From Jan To Dec From 00h To 22h.
-              </p>
-              <p>
-                Mapping A 12x12 Parametric Plane Conceptualising Temporal Dimensions Spotting Weather And Daylight Changes Via Parametric Approach To Generative Ai.
-              </p>
-              <p>
-                Establishing New Aesthetics Moving Image Approaches And Navigation As Provocative Expression Of New Media Art As Lev Manovich Theorised.
-              </p>
+                {isJapanese ? (
+                    <>
+                        <h3>日本語要約</h3>
+                        <p>
+                            本プロジェクトは、キューブ、球、円筒、螺旋、楕円円筒、放物線円筒、円錐、扁平回転楕円面、長回転楕円面、楕円面、放物面、そして双球座標系など、多様な座標系を活用した<strong>生成的トポロジカルナビゲーション (Generative Topological Navigation)</strong> の研究です。
+                        </p>
+                        <p>
+                            この作品は、生成AI時代における<strong>「データベース・シネマ (Database Cinema)」の新たな文法</strong>を定義することを目的としています。作品の視覚的基盤は、東京・渋谷の<strong>ミヤシタパーク</strong>の空模様を捉えた<strong>144枚の生成画像</strong>で構成されており、これらは<strong>1月から12月</strong>までの月と、<strong>00時から22時</strong>までの時間を軸とする<strong>12x12のパラメトリック平面 (Parametric Plane)</strong>を形成します。
+                        </p>
+                        <p>
+                            このような構造は、生成AIのパラメトリックなアプローチと多様な座標系の数学的基礎を結合し、時間的次元を概念的に解釈します。結果として、この作品は新たな美学を確立するだけでなく、ムービングイメージを制作する新しいアプローチを提示し、<strong>レフ・マノヴィッチ (Lev Manovich)</strong>が理論化したように、<strong>「ナビゲーション（探索）行為」</strong>自体をニューメディアアートの挑発的な表現様式として解釈します。
+                        </p>
+
+                        <h3>Generative Topological Navigation</h3>
+                        <p>
+                            : A Study of Coordinate Systems and Database Cinema
+                        </p>
+                        <p>
+                            This project presents a <strong>Generative Topological Navigation Study</strong> utilizing a comprehensive array of distinct coordinate systems—specifically Cube, Sphere, Cylinder, Helix, Elliptic Cylindrical, Parabolic Cylindrical, Conical, Oblate Spheroidal, Prolate Spheroidal, Ellipsoidal, Paraboloidal, and Bispherical frameworks.
+                        </p>
+                        <p>
+                            The primary objective is to define a <strong>new grammar of "Database Cinema"</strong> in the age of Generative AI. The visual foundation of this work consists of <strong>144 generative images</strong> depicting the <strong>Miyashita Park</strong> in Shibuya, Tokyo. These images are structured within a <strong>12x12 parametric plane</strong>, mapping a seasonal cycle from <strong>January to December</strong> (x-axis) and a daily cycle from <strong>00:00 to 22:00</strong> (y-axis).
+                        </p>
+                        <p>
+                            This grid forms a conceptual interpretation of the temporal dimension, intrinsically linking the parametric nature of generative AI to the mathematical basis of the diverse coordinate systems employed. By navigating this latent space, the project establishes not only a new aesthetic but also a novel approach to creating moving images. Ultimately, it reinterprets the act of <strong>navigation as a provocative expression of New Media Art</strong>, expanding upon the theoretical frameworks originally proposed by <strong>Lev Manovich</strong>.
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <h3>Generative Topological Navigation</h3>
+                        <p>
+                            : A Study of Coordinate Systems and Database Cinema
+                        </p>
+                        <p>
+                            This project presents a <strong>Generative Topological Navigation Study</strong> utilizing a comprehensive array of distinct coordinate systems—specifically Cube, Sphere, Cylinder, Helix, Elliptic Cylindrical, Parabolic Cylindrical, Conical, Oblate Spheroidal, Prolate Spheroidal, Ellipsoidal, Paraboloidal, and Bispherical frameworks.
+                        </p>
+                        <p>
+                            The primary objective is to define a <strong>new grammar of "Database Cinema"</strong> in the age of Generative AI. The visual foundation of this work consists of <strong>144 generative images</strong> depicting the <strong>Miyashita Park</strong> in Shibuya, Tokyo. These images are structured within a <strong>12x12 parametric plane</strong>, mapping a seasonal cycle from <strong>January to December</strong> (x-axis) and a daily cycle from <strong>00:00 to 22:00</strong> (y-axis).
+                        </p>
+                        <p>
+                            This grid forms a conceptual interpretation of the temporal dimension, intrinsically linking the parametric nature of generative AI to the mathematical basis of the diverse coordinate systems employed. By navigating this latent space, the project establishes not only a new aesthetic but also a novel approach to creating moving images. Ultimately, it reinterprets the act of <strong>navigation as a provocative expression of New Media Art</strong>, expanding upon the theoretical frameworks originally proposed by <strong>Lev Manovich</strong>.
+                        </p>
+
+                        <h3>日本語要約</h3>
+                        <p>
+                            本プロジェクトは、キューブ、球、円筒、螺旋、楕円円筒、放物線円筒、円錐、扁平回転楕円面、長回転楕円面、楕円面、放物面、そして双球座標系など、多様な座標系を活用した<strong>生成的トポロジカルナビゲーション (Generative Topological Navigation)</strong> の研究です。
+                        </p>
+                        <p>
+                            この作品は、生成AI時代における<strong>「データベース・シネマ (Database Cinema)」の新たな文法</strong>を定義することを目的としています。作品の視覚的基盤は、東京・渋谷の<strong>ミヤシタパーク</strong>の空模様を捉えた<strong>144枚の生成画像</strong>で構成されており、これらは<strong>1月から12月</strong>までの月と、<strong>00時から22時</strong>までの時間を軸とする<strong>12x12のパラメトリック平面 (Parametric Plane)</strong>を形成します。
+                        </p>
+                        <p>
+                            このような構造は、生成AIのパラメトリックなアプローチと多様な座標系の数学的基礎を結合し、時間的次元を概念的に解釈します。結果として、この作品は新たな美学を確立するだけでなく、ムービングイメージを制作する新しいアプローチを提示し、<strong>レフ・マノヴィッチ (Lev Manovich)</strong>が理論化したように、<strong>「ナビゲーション（探索）行為」</strong>自体をニューメディアアートの挑発的な表現様式として解釈します。
+                        </p>
+                    </>
+                )}
+                
+                <p style={{ marginTop: '30px', fontSize: '12px', opacity: 0.5 }}>
+                    Jeanyoon Choi (최정윤) | Kaist XD Lab<br/>
+                    <a href="https://www.portfolio-jyc.org/" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.3)' }}>
+                        www.portfolio-jyc.org
+                    </a>
+                </p>
+                
+                <S.CancelButton onClick={() => setShowInfo(false)}>
+                    Close
+                </S.CancelButton>
             </S.ModalContent>
-            
-            <S.CancelButton onClick={() => setShowInfo(false)}>
-              Close
-            </S.CancelButton>
           </S.InfoModal>
         </S.InfoModalOverlay>
       )}

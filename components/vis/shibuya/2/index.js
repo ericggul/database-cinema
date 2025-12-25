@@ -429,13 +429,19 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef, timeRef, 
   // Detect Layout Change and Trigger Transition
   // We use a ref to track change, but we need to update startPositions immediately
   if (layout !== lastLayout.current) {
-      // Snapshot current positions as start
-      if (currentPositions.current) {
+      const currentTime = isRecording ? recordingTime : (timeRef?.current || 0);
+
+      // Snap immediately if at time 0 (Initial Load / Reset)
+      if (currentTime === 0 && currentPositions.current) {
+          currentPositions.current.set(targetPositions);
+          startPositions.current.set(targetPositions);
+      } 
+      // Normal Transition
+      else if (currentPositions.current) {
           startPositions.current.set(currentPositions.current);
       }
       
       // Set start time
-      const currentTime = isRecording ? recordingTime : (timeRef?.current || 0);
       layoutStartTime.current = currentTime;
       
       lastLayout.current = layout;
@@ -1273,7 +1279,7 @@ export default function VisInteractive() {
             isRecording={isFrameRecording}
           />
           
-          <OrbitControls ref={controlsRef} enabled={!isAnimating} enableDamping target={[0, 0, 0]} />
+          <OrbitControls ref={controlsRef} enabled={!isAnimating && !isFrameRecording} enableDamping target={[0, 0, 0]} />
         </Canvas>
       </div>
 

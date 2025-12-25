@@ -14,7 +14,7 @@
             ]
         },
         "config": {
-            "layout": "Bispherical",
+            "layout": "Cube",
             "N": 24,
             "spacing": 3.5,
             "cubeSize": 1.0,
@@ -36,7 +36,7 @@
             ]
         },
         "config": {
-            "layout": "Bispherical",
+            "layout": "Cube",
             "N": 24,
             "spacing": 3.5,
             "cubeSize": 1.0,
@@ -58,7 +58,7 @@
             ]
         },
         "config": {
-            "layout": "Cube",
+            "layout": "Bispherical",
             "N": 24,
             "spacing": 4.5,
             "cubeSize": 3.5,
