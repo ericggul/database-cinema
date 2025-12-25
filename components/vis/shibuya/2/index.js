@@ -353,7 +353,7 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1, startHou
 const MAX_N = 24;
 const MAX_COUNT = MAX_N * MAX_N * MAX_N;
 
-function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
+function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef, timeRef, recordingTime, isRecording }) {
   const meshRef = useRef();
   const [atlas, setAtlas] = useState(null);
   
@@ -404,6 +404,18 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
   // 3. State for Animation
   const currentPositions = useRef(null);
   const startPositions = useRef(null);
+  
+  // Transition State
+  const lastLayout = useRef(layout);
+  const layoutStartTime = useRef(0);
+  
+  // Dynamic Transition Duration based on segment length
+  // Default to 1.5s, but cap at segmentDuration if provided
+  // Special case: Horizontal V2 requires 0.5s transition
+  const isHorizontalV2 = config.targetScreen === "Horizontal V2";
+  const baseDuration = isHorizontalV2 ? 0.5 : 1.5;
+  const segmentDuration = config.segmentDuration || baseDuration;
+  const TRANSITION_DURATION = Math.min(baseDuration, segmentDuration); 
 
   // Initialize immediately to avoid 0,0,0 flash
   if (!currentPositions.current) {
@@ -414,19 +426,20 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
     startPositions.current.set(targetPositions);
   }
 
-  // Spring for transition (tension 60 = 2x slower than original 120)
-  const [{ t }, api] = useSpring(() => ({
-    t: 1,
-    config: { mass: 1, tension: 110, friction: 20 },
-  }));
-
-  // Capture start positions when layout changes
-  useEffect(() => {
-    if (currentPositions.current) {
-        startPositions.current.set(currentPositions.current);
-        api.start({ t: 1, from: { t: 0 }, reset: true });
-    }
-  }, [layout, api]); 
+  // Detect Layout Change and Trigger Transition
+  // We use a ref to track change, but we need to update startPositions immediately
+  if (layout !== lastLayout.current) {
+      // Snapshot current positions as start
+      if (currentPositions.current) {
+          startPositions.current.set(currentPositions.current);
+      }
+      
+      // Set start time
+      const currentTime = isRecording ? recordingTime : (timeRef?.current || 0);
+      layoutStartTime.current = currentTime;
+      
+      lastLayout.current = layout;
+  } 
 
   const tempObject = useMemo(() => new THREE.Object3D(), []);
 
@@ -438,7 +451,25 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef }) {
         meshRef.current.count = count;
     }
 
-    const progress = t.get();
+    // Calculate Deterministic Progress
+    const currentTime = isRecording ? recordingTime : (timeRef?.current || 0);
+    const elapsed = currentTime - layoutStartTime.current;
+    
+    // If elapsed < 0 (e.g. looped), reset? 
+    // For now assume linear forward time.
+    
+    let progress = Math.min(1, Math.max(0, elapsed / TRANSITION_DURATION));
+    
+    // Easing
+    // Spring-like easing: 1 - (1-t)^3 (Cubic Out) or BackOut
+    // Using SmoothStep for now as requested "smooth"
+    // Or ElasticOut?
+    // Let's use Cubic Out for a snappy but smooth feel
+    // progress = 1 - Math.pow(1 - progress, 3);
+    
+    // Actually, user wants "smoothly transition... originally longer".
+    // SmoothStep is safe.
+    progress = THREE.MathUtils.smoothstep(progress, 0, 1);
     
     // Read from ref for smooth animation without React re-renders
     const currentSize = animationConfigRef.current ? animationConfigRef.current.cubeSize : 1.0;
@@ -768,7 +799,8 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, animationC
           N: N, // Discrete (no interpolation)
           spacing,
           cubeSize,
-          startHour: 12 // Hardcoded
+          startHour: 12, // Hardcoded
+          segmentDuration: duration // Pass segment duration for dynamic morphing
         });
         lastLayout.current = startFrame.config.layout;
         lastN.current = N;
@@ -1056,7 +1088,8 @@ export default function VisInteractive() {
     N: { value: 24, min: 1, max: 24, step: 1, label: "Grid Size (N)" },
     spacing: { value: 3, min: 0.1, max: 5.0, step: 0.1 },
     cubeSize: { value: 1.0, min: 0.1, max: 4.0, step: 0.1 },
-    startHour: { value: 12, min: 0, max: 24, step: 0.1, label: "Start Hour" }, 
+    startHour: { value: 12, min: 0, max: 24, step: 0.1, label: "Start Hour" },
+    segmentDuration: { value: 1.5, render: (get) => false } // Hidden control for internal state
   }));
 
   // 2. Action Controls (Dependent on config)
@@ -1235,6 +1268,9 @@ export default function VisInteractive() {
             onClick={setSelected} 
             config={config}
             animationConfigRef={animationConfigRef}
+            timeRef={animationTime}
+            recordingTime={recordingTime}
+            isRecording={isFrameRecording}
           />
           
           <OrbitControls ref={controlsRef} enabled={!isAnimating} enableDamping target={[0, 0, 0]} />
