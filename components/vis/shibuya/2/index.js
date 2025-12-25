@@ -249,7 +249,7 @@ const getOtherLayoutPositions = (type, count, N, spacing, cubeSize = 1, startHou
              
              const theta = u0 * Math.PI;
              const phi = v0 * Math.PI * 2;
-             const rho = 1 + (wc * 0.2); // Thickness
+             const rho = 1 + (wc * 0.2) + (((ix * 13 + iy * 17 + iz * 19) % 100) * 0.002); // Thickness + Jitter to avoid z-fighting
 
              x = a * rho * Math.sin(theta) * Math.cos(phi);
              y = b * rho * Math.sin(theta) * Math.sin(phi);
@@ -413,7 +413,7 @@ function AtlasCubeGrid({ onHover, onClick, config, animationConfigRef, timeRef, 
   // Default to 1.5s, but cap at segmentDuration if provided
   // Special case: Horizontal V2 requires 0.5s transition
   const isHorizontalV2 = config.targetScreen === "Horizontal V2";
-  const baseDuration = isHorizontalV2 ? 0.5 : 1.5;
+  const baseDuration = isHorizontalV2 ? 1.5 : 1.5;
   const segmentDuration = config.segmentDuration || baseDuration;
   const TRANSITION_DURATION = Math.min(baseDuration, segmentDuration); 
 
@@ -727,11 +727,11 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, animationC
     
     // Universal Delay: 2 seconds hold at start of each segment
     // For Vertical V2 (2s interval), 0.5s delay
-    // For Horizontal V2 (1s interval), 0 delay (continuous linear motion)
+    // For Horizontal V2 (2s interval), 0.5s delay (matching Vertical V2)
     // For Horizontal V3 (accelerating), 0 delay
     let DELAY = 1.5;
     if (targetScreen === "Vertical V2") DELAY = 0.5;
-    if (targetScreen === "Horizontal V2") DELAY = 0;
+    if (targetScreen === "Horizontal V2") DELAY = 0.5;
     if (targetScreen === "Horizontal V3") DELAY = 0;
 
     let progress;
@@ -743,7 +743,7 @@ function AnimationController({ isPlaying, time, setConfig, setCamera, animationC
       progress = Math.min(1, Math.max(0, (elapsed - DELAY) / animDuration));
     }
     
-    const easedProgress = (targetScreen === "Horizontal V2" || targetScreen === "Horizontal V3") ? progress : THREE.MathUtils.smoothstep(progress, 0, 1); // Simple ease-in-out
+    const easedProgress = (targetScreen === "Horizontal V3") ? progress : THREE.MathUtils.smoothstep(progress, 0, 1); // Simple ease-in-out
 
     // Snappy CubeSize Transition (0.5s duration)
     // "찰지게 확 커지게" -> Use BackOut easing for a pop effect

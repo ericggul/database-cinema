@@ -14,7 +14,7 @@
             ]
         },
         "config": {
-            "layout": "Ellipsoidal",
+            "layout": "Bispherical",
             "N": 24,
             "spacing": 3.5,
             "cubeSize": 1.0,
@@ -22,7 +22,29 @@
         }
     },
     {
-        "time": 7,
+        "time": 1,
+        "camera": {
+            "spherical": {
+                "radius": 60,
+                "theta": 45,
+                "phi": 70
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Bispherical",
+            "N": 24,
+            "spacing": 3.5,
+            "cubeSize": 1.0,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 6,
         "camera": {
             "spherical": {
                 "radius": 140,
@@ -36,7 +58,7 @@
             ]
         },
         "config": {
-            "layout": "Scatter",
+            "layout": "Cube",
             "N": 24,
             "spacing": 4.5,
             "cubeSize": 3.5,
@@ -44,7 +66,7 @@
         }
     },
     {
-        "time": 14,
+        "time": 11,
         "camera": {
             "spherical": {
                 "radius": 200,
@@ -61,12 +83,12 @@
             "layout": "Cylinder",
             "N": 24,
             "spacing": 4.0,
-            "cubeSize": 2.0,
+            "cubeSize": 3.5,
             "startHour": 12
         }
     },
     {
-        "time": 20,
+        "time": 16,
         "camera": {
             "spherical": {
                 "radius": 150,
@@ -88,10 +110,54 @@
         }
     },
     {
-        "time": 27,
+        "time": 21,
+        "camera": {
+            "spherical": {
+                "radius": 180,
+                "theta": 405,
+                "phi": 75
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Parabolic Cylinder",
+            "N": 24,
+            "spacing": 4.2,
+            "cubeSize": 1.8,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 26,
         "camera": {
             "spherical": {
                 "radius": 0.1,
+                "theta": 450,
+                "phi": 135
+            },
+            "target": [
+                0,
+                0,
+                0
+            ]
+        },
+        "config": {
+            "layout": "Sphere",
+            "N": 24,
+            "spacing": 2.0,
+            "cubeSize": 0.9,
+            "startHour": 12
+        }
+    },
+    {
+        "time": 27,
+        "camera": {
+            "spherical": {
+                "radius": 100,
                 "theta": 450,
                 "phi": 135
             },
